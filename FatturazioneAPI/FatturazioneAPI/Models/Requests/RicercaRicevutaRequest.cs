@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace RicevutaAPI.Models.Requests
+namespace FatturazioneAPI.Models.Requests
 {
     public class RicercaRicevutaRequest
     {

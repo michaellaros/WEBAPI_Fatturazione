@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using RicevutaAPI.Models;
-using RicevutaAPI.Models.Requests;
-using RicevutaAPI.Models.Responses;
-using RicevutaAPI.Services;
+using FatturazioneAPI.Models;
+using FatturazioneAPI.Models.Requests;
+using FatturazioneAPI.Models.Responses;
+using FatturazioneAPI.Services;
 using System.Linq.Expressions;
 
 namespace Ricevuta.Controllers
@@ -15,12 +15,12 @@ namespace Ricevuta.Controllers
     {
         private readonly RicevutaBiz _ricevuta;
         private readonly DataBase _DataBase;
-        private readonly ClientiBiz _cliente;
+        
         public RicevutaController(IConfiguration configuration)
         {
             _DataBase = new DataBase(configuration); //possibile miglioria? interfaccia?
             _ricevuta = new RicevutaBiz();
-            _cliente = new ClientiBiz(configuration);
+            
         }
         [HttpGet]
         [Route("{fileName}")]
@@ -91,19 +91,6 @@ namespace Ricevuta.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
-        [Route("Cliente")]
-        public IActionResult RicercaCliente(RicercaClienteRequest request)
-        {
-            if (request.IsEmpty()) return BadRequest();
-
-            RicercaClientiResponse response = new RicercaClientiResponse
-            {
-                clienti = _cliente.GetClienti(request)
-            };
-            if (response.clienti == null) return StatusCode(500);
-            if (response.clienti.Count == 0) return NotFound();
-            return Ok(response);
-        }
+        
     }
 }

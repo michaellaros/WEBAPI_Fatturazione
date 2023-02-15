@@ -1,4 +1,4 @@
-﻿namespace RicevutaAPI.Models
+﻿namespace FatturazioneAPI.Models
 {
     public class ClientiModel
     {
@@ -6,10 +6,10 @@
         public string clientSurname { get; set; }
         public string clientName { get; set; }
         
-        public DateOnly birthDate { get; set; }
+        public DateTime birthDate { get; set; }
         public string clientAdress { get; set;}
         public string client_Email { get; set; }
-        public ClientiModel(string clientSurname, string clientName,DateOnly birthDate,string clientAddress,string client_Email) {
+        public ClientiModel(string clientSurname, string clientName,DateTime birthDate,string clientAddress,string client_Email) {
             this.clientSurname = clientSurname;
             this.clientName = clientName;
             this.birthDate = birthDate;

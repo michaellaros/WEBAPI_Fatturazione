@@ -1,4 +1,4 @@
-﻿namespace RicevutaAPI.Models.Responses
+﻿namespace FatturazioneAPI.Models.Responses
 {
     public class RicercaClientiResponse
     {

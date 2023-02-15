@@ -1,8 +1,8 @@
 ﻿using System.Text;
-using RicevutaAPI.Models;
+using FatturazioneAPI.Models;
 using Microsoft.Data.SqlClient;
 
-namespace RicevutaAPI.Services
+namespace FatturazioneAPI.Services
 {
     public class DataBase
     {
