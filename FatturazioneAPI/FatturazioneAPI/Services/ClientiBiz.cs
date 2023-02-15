@@ -12,7 +12,7 @@ namespace RicevutaAPI.Services
         public ClientiBiz(IConfiguration configuration)
         {
             this.configuration = configuration;
-            con = new SqlConnection(configuration.GetSection("appsettings").GetValue<string>("RicevuteDB"));
+            con = new SqlConnection(configuration.GetSection("appsettings").GetValue<string>("connectionstring"));
             con.Open();
 
         }
