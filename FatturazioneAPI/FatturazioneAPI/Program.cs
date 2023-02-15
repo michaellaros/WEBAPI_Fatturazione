@@ -13,7 +13,7 @@ builder.Services.AddSingleton<DataBase>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: "antonio",
+    options.AddPolicy(name: "cors",
                       policy =>
                       {
                           policy.WithOrigins("http://example.com",
@@ -32,6 +32,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("cors");
 
 app.UseAuthorization();
 

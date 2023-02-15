@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 
 namespace Ricevuta.Controllers
 {
-    [EnableCors("antonio")]
+    [EnableCors("cors")]
     [Route("api/[controller]")]
     [ApiController]
     public class RicevutaController : Controller

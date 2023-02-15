@@ -13,7 +13,7 @@ namespace RicevutaAPI.Services
         public DataBase(IConfiguration configuration)
         {
             this.configuration = configuration;
-            con = new SqlConnection(configuration.GetSection("appsettings").GetValue<string>("RicevuteDB"));
+            con = new SqlConnection(configuration.GetSection("appSettings").GetValue<string>("ConnectionString"));
             con.Open();
 
         }
