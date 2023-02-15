@@ -13,7 +13,7 @@ namespace FatturazioneAPI.Services
 
             try
             {
-                RicevutaModel ricevuta = new RicevutaModel(fileName);
+                RicevutaModel ricevuta = new RicevutaModel(fileName.Substring(fileName.LastIndexOf("\\")+1));
                 if (File.Exists(fileName))
                 {
                     XmlTextReader reader = new XmlTextReader(fileName);
