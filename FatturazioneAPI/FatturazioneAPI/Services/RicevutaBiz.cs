@@ -1,9 +1,9 @@
-﻿using RicevutaAPI.Models;
-using RicevutaAPI.Models.Requests;
+﻿using FatturazioneAPI.Models;
+using FatturazioneAPI.Models.Requests;
 using System.Text;
 using System.Xml;
 
-namespace RicevutaAPI.Services
+namespace FatturazioneAPI.Services
 {
     public class RicevutaBiz
     {

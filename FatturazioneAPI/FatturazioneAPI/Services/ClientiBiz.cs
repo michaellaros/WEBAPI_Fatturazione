@@ -1,9 +1,9 @@
 ﻿using Microsoft.Data.SqlClient;
-using RicevutaAPI.Models;
+using FatturazioneAPI.Models;
 using System;
-using RicevutaAPI.Models.Requests;
+using FatturazioneAPI.Models.Requests;
 
-namespace RicevutaAPI.Services
+namespace FatturazioneAPI.Services
 {
     public class ClientiBiz
     {
@@ -20,8 +20,7 @@ namespace RicevutaAPI.Services
         {
             List<ClientiModel> result = new List<ClientiModel>();
 
-            string query = $"select * from TEST1_CLIENTE where nome ='{request.clientName}'" ;
-            List<string> resultDB = new List<string>();
+            string query = $"select cognome,nome,data_nascita,indirizzo,email from TEST1_CLIENTE where nome ='{request.clientSurname}'" ;
             using (SqlCommand cmd = new SqlCommand(query, con))
             {
 
@@ -31,12 +30,13 @@ namespace RicevutaAPI.Services
                         return null;
                     while (reader.Read())
                     {
-                        result.Add(new ClientiModel(reader["nome"].ToString(),
-                            reader["cognome"].ToString(),
-                            DateOnly.Parse(reader["data_nascita"].ToString()),
+                        result.Add(new ClientiModel(reader["cognome"].ToString(),
+                            reader["nome"].ToString(),
+                            DateTime.Parse(reader["data_nascita"].ToString()),
                             reader["indirizzo"].ToString(),
                             reader["email"].ToString()
                             ));
+                        Console.WriteLine(result.Count);
                     }
 
                 }

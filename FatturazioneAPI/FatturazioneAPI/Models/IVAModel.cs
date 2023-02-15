@@ -1,4 +1,4 @@
-﻿namespace RicevutaAPI.Models
+﻿namespace FatturazioneAPI.Models
 {
     public class IVAModel
     {

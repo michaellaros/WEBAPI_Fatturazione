@@ -1,4 +1,4 @@
-using RicevutaAPI.Services;
+using FatturazioneAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
