@@ -2,6 +2,7 @@
 using FatturazioneAPI.Models;
 using System;
 using FatturazioneAPI.Models.Requests;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace FatturazioneAPI.Services
 {
@@ -20,14 +21,14 @@ namespace FatturazioneAPI.Services
         {
             List<ClientiModel> result = new List<ClientiModel>();
 
-            string query = $"select cognome,nome,data_nascita,indirizzo,email from TEST1_CLIENTE where nome ='{request.clientSurname}'" ;
+            string query = $"select cognome,nome,data_nascita,indirizzo,email from TEST1_CLIENTE where cognome ='{request.clientSurname}'" ;
             using (SqlCommand cmd = new SqlCommand(query, con))
             {
 
                 using (SqlDataReader reader = cmd.ExecuteReader())
                 {
                     if (!reader.HasRows)
-                        return null;
+                        return result;
                     while (reader.Read())
                     {
                         result.Add(new ClientiModel(reader["cognome"].ToString(),
@@ -36,7 +37,7 @@ namespace FatturazioneAPI.Services
                             reader["indirizzo"].ToString(),
                             reader["email"].ToString()
                             ));
-                        Console.WriteLine(result.Count);
+                        
                     }
 
                 }
