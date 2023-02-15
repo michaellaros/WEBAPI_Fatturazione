@@ -2,6 +2,7 @@
 {
     public class ArticoloModel
     {
+    
         public string desc_articolo { get; set; }
         public decimal prezzo { get; set; }
         public int quantita { get; set; }

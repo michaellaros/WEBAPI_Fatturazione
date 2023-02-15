@@ -26,7 +26,7 @@ namespace Ricevuta.Controllers
         [Route("{fileName}")]
         public IActionResult Get(string fileName)
         {
-            RicevutaModel result = _ricevuta.RicevutaCostruction(fileName);
+            RicevutaModel result = _ricevuta.RicevutaCostruction(fileName.Replace("%2F","/"));
             if(result==null) return NotFound();
             return Ok(result);
         }

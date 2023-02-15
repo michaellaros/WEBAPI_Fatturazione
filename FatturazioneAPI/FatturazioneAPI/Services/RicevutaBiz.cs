@@ -13,7 +13,7 @@ namespace RicevutaAPI.Services
 
             try
             {
-                RicevutaModel recipe = new RicevutaModel(fileName);
+                RicevutaModel ricevuta = new RicevutaModel(fileName);
                 if (File.Exists(fileName))
                 {
                     XmlTextReader reader = new XmlTextReader(fileName);
@@ -33,18 +33,47 @@ namespace RicevutaAPI.Services
                             if (prezzoNode != null)
                             {
                                 string nameArticolo = node.SelectSingleNode("ARTICLE/szDesc").InnerXml;
-                                decimal ivaValue = decimal.Parse(node.SelectSingleNode("TAX_ART/dPercent").InnerXml);
-                                string ivaGroup = node.SelectSingleNode("TAX_ART/TAX/szTaxGroupRuleName").InnerXml;
+                                XmlNode ivaNode = GetIvaFromArticleId(xml, node.SelectSingleNode("Hdr/lTaCreateNmbr").InnerXml);
+                                
+                                decimal ivaValue = decimal.Parse(ivaNode.SelectSingleNode("dIncludedTaxValue").InnerXml.Replace(".", ","));
+                                string ivaGroup = ivaNode.SelectSingleNode("TAX/szTaxGroupRuleName").InnerXml;
                                 IVAModel iva = new IVAModel(ivaGroup, ivaValue);
                                 int quantita = int.Parse(node.SelectSingleNode("dTaQty").InnerXml);
                                 decimal prezzo = Math.Round(decimal.Parse(prezzoNode.InnerXml.Replace(".", ",")), 2);
-                                string discount = node.SelectSingleNode("szDiscDesc").InnerXml;
-                                ArticoloModel articolo1 = new ArticoloModel(nameArticolo, prezzo, quantita, false, iva);
-                                recipe.articoli.Add(articolo1);
+                                ricevuta.articoli.Add(new ArticoloModel(nameArticolo, prezzo, quantita, false,iva));
 
                             }
                         }
-                        return recipe;
+
+                        //cicle discounts
+                        foreach (XmlNode node in xml.SelectNodes("TAS/NEW_TA/DISC_INFO"))
+                        {
+                            XmlNode prezzoNode = node.SelectSingleNode("dDiscValue");
+                            if (prezzoNode != null)
+                            {
+                                string nomeDiscount = node.SelectSingleNode("szDiscDesc").InnerXml;
+                                int quantita = int.Parse(node.SelectSingleNode("dDiscQty") != null ? node.SelectSingleNode("dDiscQty").InnerXml : "1");
+                                decimal prezzo = -decimal.Parse(prezzoNode.InnerXml.Replace(".", ","));
+                                ricevuta.articoli.Add(new ArticoloModel(nomeDiscount, prezzo, quantita, true));
+                            }
+
+                        }
+
+                        //cicle discounts
+                        foreach (XmlNode node in xml.SelectNodes("TAS/NEW_TA/DISC_INFO"))
+                        {
+                            XmlNode prezzoNode = node.SelectSingleNode("dDiscValue");
+                            if (prezzoNode != null)
+                            {
+                                string nomeDiscount = node.SelectSingleNode("szDiscDesc").InnerXml;
+                                int quantita = int.Parse(node.SelectSingleNode("dDiscQty") != null ? node.SelectSingleNode("dDiscQty").InnerXml : "1");
+                                decimal prezzo = -decimal.Parse(prezzoNode.InnerXml.Replace(".", ","));
+                                ricevuta.articoli.Add(new ArticoloModel(nomeDiscount, prezzo, quantita, true));
+                            }
+
+                        }
+
+                        return ricevuta;
 
 
                     }
@@ -334,6 +363,16 @@ namespace RicevutaAPI.Services
             if(request.data != null && fileNameSplit[3] != request.dataString.Substring(0,8))
                 return false;
             return true;
+        }
+
+        public XmlNode GetIvaFromArticleId(XmlDocument xml, string articleId)
+        {
+            foreach (XmlNode iva in xml.SelectNodes("TAS/NEW_TA/TAX_ART"))
+            {
+                if(iva.SelectSingleNode("Hdr/lTaRefToCreateNmbr").InnerXml == articleId)
+                    return iva;
+            }
+            return null;
         }
     }
 }
