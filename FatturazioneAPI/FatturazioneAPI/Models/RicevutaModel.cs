@@ -16,8 +16,32 @@
                 return totale;
             } 
         }
-        public int numero_articoli { get { return articoli.FindAll(x => x.flg_isDiscount == false).Count(); } }
-        public int numero_sconti { get { return articoli.FindAll(x => x.flg_isDiscount == true).Count(); } }
+        public List<IVAModel> riepilogoIva { 
+            get { 
+                List<IVAModel> ivaList = new List<IVAModel>();
+                foreach(ArticoloModel articolo in articoli)
+                {
+                    bool flg_new = true;
+                    foreach(IVAModel iva in ivaList.ToList())
+                    {
+                        if(iva.ivaGroup == articolo.ivaArticolo.ivaGroup)
+                        {
+                            ivaList.RemoveAll(x => x.ivaGroup == iva.ivaGroup);
+                            iva.ivaPrice += articolo.ivaArticolo.ivaPrice;
+                            ivaList.Add(iva);
+                            flg_new = false;
+                        }
+                    }
+                    if(flg_new)
+                    {
+                        ivaList.Add(articolo.ivaArticolo);
+                    }
+
+                }
+                return ivaList;
+
+            } 
+        }
         public RicevutaModel(string nome_ricevuta) 
         { 
             this.nome_ricevuta= nome_ricevuta;

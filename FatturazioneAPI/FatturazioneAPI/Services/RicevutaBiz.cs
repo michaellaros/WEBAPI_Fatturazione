@@ -32,6 +32,7 @@ namespace FatturazioneAPI.Services
                             XmlNode prezzoNode = node.SelectSingleNode("dTaPrice");
                             if (prezzoNode != null)
                             {
+                                string codArticolo =  node.SelectSingleNode("ARTICLE/szItemID").InnerXml;
                                 string nameArticolo = node.SelectSingleNode("ARTICLE/szDesc").InnerXml;
                                 XmlNode ivaNode = GetIvaFromArticleId(xml, node.SelectSingleNode("Hdr/lTaCreateNmbr").InnerXml);
                                 
@@ -40,7 +41,7 @@ namespace FatturazioneAPI.Services
                                 IVAModel iva = new IVAModel(ivaGroup, ivaValue);
                                 int quantita = int.Parse(node.SelectSingleNode("dTaQty").InnerXml);
                                 decimal prezzo = Math.Round(decimal.Parse(prezzoNode.InnerXml.Replace(".", ",")), 2);
-                                ricevuta.articoli.Add(new ArticoloModel(nameArticolo, prezzo, quantita, false,iva));
+                                ricevuta.articoli.Add(new ArticoloModel(codArticolo,nameArticolo, prezzo, quantita, false,iva));
 
                             }
                         }
