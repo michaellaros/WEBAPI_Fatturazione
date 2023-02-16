@@ -1,21 +1,23 @@
-﻿namespace FatturazioneAPI.Models
+﻿using System.Text.Json.Serialization;
+
+namespace FatturazioneAPI.Models
 {
     public class ClientiModel
     {
-        public List<ClientiModel> clienti { get; set; }
         public string clientSurname { get; set; }
         public string clientName { get; set; }
-        
-        public DateTime birthDate { get; set; }
-        public string clientAdress { get; set;}
-        public string client_Email { get; set; }
+
+        [JsonIgnore]
+        public DateTime birthDateDt { get; set; }
+        public string birthDate { get { return birthDateDt.ToString("dd/MM/yyyy"); } }
+        public string clientAddress { get; set;}
+        public string clientEmail { get; set; }
         public ClientiModel(string clientSurname, string clientName,DateTime birthDate,string clientAddress,string client_Email) {
             this.clientSurname = clientSurname;
             this.clientName = clientName;
-            this.birthDate = birthDate;
-            this.clientAdress = clientAddress;
-            this.client_Email = client_Email;
-            clienti = new List<ClientiModel>();
+            this.birthDateDt = birthDate;
+            this.clientAddress = clientAddress;
+            this.clientEmail = client_Email;
         }
     }
 }

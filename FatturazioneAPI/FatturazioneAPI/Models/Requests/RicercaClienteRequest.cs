@@ -12,7 +12,7 @@ namespace FatturazioneAPI.Models.Requests
         public string? clientAdress { get; set; }
         public bool IsEmpty()
         {
-            return clientSurname == null && clientName == null && birthDate == null && clientAdress == null;
+            return clientSurname == null && clientName == null && birthDate == null && clientAdress == null && birthDate == null;
         }
     }
 }

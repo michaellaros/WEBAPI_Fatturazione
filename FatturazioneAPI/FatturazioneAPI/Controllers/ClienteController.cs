@@ -24,7 +24,6 @@ namespace FatturazioneAPI.Controllers
         
 
         [HttpPost]
-        [Route("Cliente")]
         public IActionResult RicercaCliente(RicercaClienteRequest request)
         {
             if (request.IsEmpty()) return BadRequest();

@@ -21,7 +21,7 @@ namespace FatturazioneAPI.Services
         {
             List<ClientiModel> result = new List<ClientiModel>();
 
-            string query = $"select cognome,nome,data_nascita,indirizzo,email from TEST1_CLIENTE where cognome ='{request.clientSurname}'" ;
+            string query = $"select cognome,nome,data_nascita,indirizzo,email from TEST1_CLIENTE where cognome like '%{request.clientSurname}%' and nome like '%{request.clientName}%' and indirizzo like '%{request.clientAdress}%' and (data_nascita = '{request.birthDate?.AddHours(1)}' or isnull('{request.birthDate}','') = '')" ; //aggiunta un ora perche nel datepicker utilizza un fusorario diverso
             using (SqlCommand cmd = new SqlCommand(query, con))
             {
 
