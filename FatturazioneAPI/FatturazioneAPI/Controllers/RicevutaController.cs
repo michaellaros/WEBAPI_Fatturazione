@@ -15,18 +15,20 @@ namespace Ricevuta.Controllers
     {
         private readonly RicevutaBiz _ricevuta;
         private readonly DataBase _DataBase;
+        private readonly PDFBiz _PDF;
         
         public RicevutaController(IConfiguration configuration)
         {
             _DataBase = new DataBase(configuration); //possibile miglioria? interfaccia?
             _ricevuta = new RicevutaBiz();
+            _PDF = new PDFBiz(configuration);
             
         }
         [HttpGet]
         [Route("{fileName}")]
         public IActionResult Get(string fileName)
         {
-            RicevutaModel result = _ricevuta.RicevutaCostruction(fileName.Replace("%2F","/"));
+            RicevutaModel result = _ricevuta.RicevutaCostruction(fileName.Replace("%2F","/")); //ripristino gli / che tramite url vengono sostiuiti
             if(result==null) return NotFound();
             return Ok(result);
         }
@@ -35,7 +37,7 @@ namespace Ricevuta.Controllers
         [Route("GetRicevuta")]
         public IActionResult GetRicevuta(GetRicevutaRequest request)
         {
-            RicevutaModel result = _ricevuta.RicevutaCostruction(request.fileName.Replace("%2F", "/"));
+            RicevutaModel result = _ricevuta.RicevutaCostruction(request.fileName);
             if (result == null) return NotFound();
             return Ok(result);
         }
@@ -95,6 +97,6 @@ namespace Ricevuta.Controllers
             return Ok(response);
         }
 
-        
+
     }
 }
