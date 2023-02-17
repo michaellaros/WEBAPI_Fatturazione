@@ -1,5 +1,6 @@
 ﻿using FatturazioneAPI.Models;
 using FatturazioneAPI.Models.Requests;
+using System.IO;
 using System.Text;
 using System.Xml;
 
@@ -202,8 +203,6 @@ namespace FatturazioneAPI.Services
                 StringBuilder result = new StringBuilder();
                 if (File.Exists(path))
                 {
-                    XmlTextReader reader = new XmlTextReader(path);
-                    reader.WhitespaceHandling = WhitespaceHandling.None;
                     XmlDocument xml = new XmlDocument();
                     xml.Load(path);
                     //verifico che sia di tipo sale
@@ -343,7 +342,7 @@ namespace FatturazioneAPI.Services
                 {
                     result.AddRange(Directory.GetFiles(folder)
                         .Where(x =>
-                        CheckRicevutaMatchFilter(x.Substring(x.LastIndexOf(@"\")+1), request)));
+                        CheckRicevutaMatchFilter(x, request)));
                 }
             }catch(Exception e)
             {
@@ -354,7 +353,7 @@ namespace FatturazioneAPI.Services
 
         public bool CheckRicevutaMatchFilter(string fileName, RicercaRicevutaRequest request)
         {
-            string[] fileNameSplit = fileName.Split('_');
+            string[] fileNameSplit = fileName.Substring(fileName.LastIndexOf(@"\") + 1).Split('_');
             if(!string.IsNullOrEmpty( request.negozio) && fileNameSplit[0] != request.negozio)
                 return false;
             if(!string.IsNullOrEmpty(request.cassa) && fileNameSplit[1] != request.cassa)
@@ -362,6 +361,10 @@ namespace FatturazioneAPI.Services
             if(!string.IsNullOrEmpty(request.transazione) && fileNameSplit[2] != request.transazione)
                 return false;
             if(request.data != null && fileNameSplit[3] != request.dataString.Substring(0,8))
+                return false;
+            XmlDocument xml = new XmlDocument();
+            xml.Load(fileName);
+            if (xml.SelectSingleNode("TAS/NEW_TA/TA_CONTROL/szTaType").InnerXml != "SA")
                 return false;
             return true;
         }

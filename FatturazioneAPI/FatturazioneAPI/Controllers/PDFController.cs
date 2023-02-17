@@ -23,16 +23,18 @@ namespace FatturazioneAPI.Controllers
         public IActionResult Get()
         {
 
-            _PDF.GeneraFattura();
-            return Ok();
+            string fileName = _PDF.GeneraFattura();
+            var stream = new FileStream(fileName, FileMode.Open);
+            return File(stream, "application/pdf");
         }
 
         [HttpPost]
         [Route("SendPDF")]
         public IActionResult SendPDF(SendPDFRequest request)
         {
-            _PDF.GeneraPDFFromRicevuta(request);
-            return Ok();
+            string fileName = _PDF.GeneraFattura();
+            var stream = new FileStream(fileName, FileMode.Open);
+            return File(stream, "application/pdf");
         }
     }
 }

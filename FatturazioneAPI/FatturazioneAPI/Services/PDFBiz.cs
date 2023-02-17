@@ -25,7 +25,7 @@ namespace FatturazioneAPI.Services
 
         }
 
-        public void GeneraPDF()
+        public string GeneraPDF()
         {
             // Create a new PDF document
             PdfDocument document = new PdfDocument();
@@ -74,9 +74,10 @@ namespace FatturazioneAPI.Services
             document.Save(filename);
             // ...and start a viewer.
             //Process.Start(filename);
+            return filename;
         }
 
-        public void GeneraFattura() {
+        public string GeneraFattura() {
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             PdfDocument document = PdfReader.Open("C:\\Temp\\template\\modello-fattura.pdf", PdfDocumentOpenMode.Modify);
 
@@ -120,6 +121,8 @@ namespace FatturazioneAPI.Services
             // Save the document...
             const string filename = "C:\\Temp\\HelloWorld1.pdf";
             document.Save(filename);
+
+            return filename;
         }
 
         public void GeneraPDFFromRicevuta(SendPDFRequest request)

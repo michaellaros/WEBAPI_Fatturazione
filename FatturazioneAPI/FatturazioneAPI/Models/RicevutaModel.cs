@@ -19,7 +19,7 @@
         public List<IVAModel> riepilogoIva { 
             get { 
                 List<IVAModel> ivaList = new List<IVAModel>();
-                foreach(ArticoloModel articolo in articoli)
+                foreach(ArticoloModel articolo in articoli.Where(x=>x.flg_isDiscount==false))
                 {
                     bool flg_new = true;
                     foreach(IVAModel iva in ivaList.ToList())
