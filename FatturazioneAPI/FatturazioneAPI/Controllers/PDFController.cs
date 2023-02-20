@@ -32,7 +32,7 @@ namespace FatturazioneAPI.Controllers
         [Route("SendPDF")]
         public IActionResult SendPDF(SendPDFRequest request)
         {
-            string fileName = _PDF.GeneraFattura();
+            string fileName = _PDF.GeneraPDFFromRicevuta(request);
             var stream = new FileStream(fileName, FileMode.Open);
             return File(stream, "application/pdf");
         }
