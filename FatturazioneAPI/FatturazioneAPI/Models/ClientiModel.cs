@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace FatturazioneAPI.Models
 {
@@ -12,6 +13,7 @@ namespace FatturazioneAPI.Models
         public string birthDate { get { return birthDateDt.ToString("dd/MM/yyyy"); } }
         public string clientAddress { get; set;}
         public string clientEmail { get; set; }
+        public ClientiModel() { }
         public ClientiModel(string clientSurname, string clientName,DateTime birthDate,string clientAddress,string client_Email) {
             this.clientSurname = clientSurname;
             this.clientName = clientName;
@@ -19,5 +21,6 @@ namespace FatturazioneAPI.Models
             this.clientAddress = clientAddress;
             this.clientEmail = client_Email;
         }
+
     }
 }

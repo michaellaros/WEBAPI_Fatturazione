@@ -14,7 +14,7 @@ namespace FatturazioneAPI.Services
 
             try
             {
-                RicevutaModel ricevuta = new RicevutaModel(fileName.Substring(fileName.LastIndexOf("\\")+1));
+                RicevutaModel ricevuta = new RicevutaModel(fileName.Substring(fileName.LastIndexOf("\\")+1).Replace(".xml",""));
                 if (File.Exists(fileName))
                 {
                     XmlTextReader reader = new XmlTextReader(fileName);
@@ -37,7 +37,7 @@ namespace FatturazioneAPI.Services
                                 string nameArticolo = node.SelectSingleNode("ARTICLE/szDesc").InnerXml;
                                 XmlNode ivaNode = GetIvaFromArticleId(xml, node.SelectSingleNode("Hdr/lTaCreateNmbr").InnerXml);
                                 
-                                decimal ivaValue = decimal.Parse(ivaNode.SelectSingleNode("dIncludedTaxValue").InnerXml.Replace(".", ","));
+                                decimal ivaValue = decimal.Parse(ivaNode.SelectSingleNode("dTotalSale").InnerXml.Replace(".", ","));
                                 string ivaGroup = ivaNode.SelectSingleNode("TAX/szTaxGroupRuleName").InnerXml;
                                 IVAModel iva = new IVAModel(ivaGroup, ivaValue);
                                 int quantita = int.Parse(node.SelectSingleNode("dTaQty").InnerXml);
@@ -360,7 +360,7 @@ namespace FatturazioneAPI.Services
                 return false;
             if(!string.IsNullOrEmpty(request.transazione) && fileNameSplit[2] != request.transazione)
                 return false;
-            if(request.data != null && fileNameSplit[3] != request.dataString.Substring(0,8))
+            if(request.data != null && fileNameSplit[3].Substring(0, 8) != request.dataString.Substring(0,8))
                 return false;
             XmlDocument xml = new XmlDocument();
             xml.Load(fileName);

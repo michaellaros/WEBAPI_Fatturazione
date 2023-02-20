@@ -11,7 +11,7 @@
         public decimal prezzo_totale_articolo { get { return prezzo * quantita; } }
         public IVAModel ivaArticolo { get; set; }
 
-
+        public ArticoloModel() { }
         public ArticoloModel(string cod_articolo,string desc_articolo, decimal prezzo, int quantita, bool flg_isDiscount, IVAModel ivaArticolo)
         {
             this.cod_articolo= cod_articolo;

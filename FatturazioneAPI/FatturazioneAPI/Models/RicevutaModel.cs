@@ -1,4 +1,7 @@
-﻿namespace FatturazioneAPI.Models
+﻿using FatturazioneAPI.Models.Requests;
+using System.Text.Json;
+
+namespace FatturazioneAPI.Models
 {
     public class RicevutaModel
     {
@@ -46,6 +49,10 @@
         { 
             this.nome_ricevuta= nome_ricevuta;
             articoli= new List<ArticoloModel>();
+        }
+
+        public RicevutaModel()
+        {
         }
     }
 

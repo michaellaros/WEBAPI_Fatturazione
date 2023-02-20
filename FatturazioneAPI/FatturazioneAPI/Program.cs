@@ -1,4 +1,5 @@
 using FatturazioneAPI.Services;
+using PdfSharp.Charting;
 
 var builder = WebApplication.CreateBuilder(args);
 
