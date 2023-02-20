@@ -41,9 +41,10 @@ namespace FatturazioneAPI.Services
                                 string codArticolo =  node.SelectSingleNode("ARTICLE/szItemID").InnerXml;
                                 string nameArticolo = node.SelectSingleNode("ARTICLE/szDesc").InnerXml;
                                 XmlNode ivaNode = GetIvaFromArticleId(xml, node.SelectSingleNode("Hdr/lTaCreateNmbr").InnerXml);
-                                
-                                decimal ivaValue = decimal.Parse(ivaNode.SelectSingleNode("dTotalSale").InnerXml.Replace(".", ","));
                                 string ivaGroup = ivaNode.SelectSingleNode("TAX/szTaxGroupRuleName").InnerXml;
+                                
+                                decimal ivaValue = ivaGroup == "Tax free" ? 0 : decimal.Parse(ivaNode.SelectSingleNode("dIncludedTaxValue").InnerXml.Replace(".", ","));
+                                
                                 IVAModel iva = new IVAModel(ivaGroup, ivaValue);
                                 int quantita = int.Parse(node.SelectSingleNode("dTaQty").InnerXml);
                                 decimal prezzo = Math.Round(decimal.Parse(prezzoNode.InnerXml.Replace(".", ",")), 2);
