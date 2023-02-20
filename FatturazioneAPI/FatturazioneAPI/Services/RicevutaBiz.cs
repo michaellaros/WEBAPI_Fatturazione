@@ -8,7 +8,12 @@ namespace FatturazioneAPI.Services
 {
     public class RicevutaBiz
     {
-        private string pathCartella { get { return @"C:\Temp\Normal"; } }
+        readonly IConfiguration configuration;
+        private string pathCartella { get { return configuration.GetSection("appsettings").GetValue<string>("folderstring"); } }
+        public RicevutaBiz(IConfiguration configuration)
+        {
+            this.configuration = configuration;
+        }
         public RicevutaModel RicevutaCostruction(string fileName)
         {
 

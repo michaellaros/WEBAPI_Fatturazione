@@ -20,7 +20,7 @@ namespace Ricevuta.Controllers
         public RicevutaController(IConfiguration configuration)
         {
             _DataBase = new DataBase(configuration); //possibile miglioria? interfaccia?
-            _ricevuta = new RicevutaBiz();
+            _ricevuta = new RicevutaBiz(configuration);
             _PDF = new PDFBiz(configuration);
             
         }
