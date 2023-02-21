@@ -2,6 +2,6 @@
 {
     public class RicercaRicevutaResponse
     {
-        public List<string> ricevute { get; set; } = new List<string>();
+        public List<RicevutaSelectModel> ricevute { get; set; } = new List<RicevutaSelectModel>();
     }
 }
