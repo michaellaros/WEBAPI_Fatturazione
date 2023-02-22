@@ -12,17 +12,17 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
 builder.Services.AddSingleton<DataBase>();
 var app = builder.Build();
-app.UseCors(options => options.AllowAnyHeader()
-                              .AllowAnyMethod()
-                              .AllowAnyOrigin()
-                      );
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseCors(options => options.AllowAnyHeader()
+                              .AllowAnyMethod()
+                              .AllowAnyOrigin()
+                      );
 app.UseAuthorization();
 
 app.MapControllers();

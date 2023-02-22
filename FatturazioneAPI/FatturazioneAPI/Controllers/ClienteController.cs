@@ -8,8 +8,7 @@ using System.Linq.Expressions;
 
 namespace FatturazioneAPI.Controllers
 {
-    [EnableCors("cors")]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class ClienteController : Controller
     {
