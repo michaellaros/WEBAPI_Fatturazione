@@ -13,12 +13,11 @@ namespace Ricevuta.Controllers
     public class RicevutaController : Controller
     {
         private readonly RicevutaBiz _ricevuta;
-        private readonly DataBase _DataBase;
         private readonly PDFBiz _PDF;
         
         public RicevutaController(IConfiguration configuration)
         {
-            _DataBase = new DataBase(configuration); //possibile miglioria? interfaccia?
+            //_DataBase = new DataBase(configuration); //possibile miglioria? interfaccia?
             _ricevuta = new RicevutaBiz(configuration);
             _PDF = new PDFBiz(configuration);
             
@@ -41,45 +40,45 @@ namespace Ricevuta.Controllers
             return Ok(result);
         }
 
-        [HttpGet]
-        [Route("DB/{fileName}")]
-        public IActionResult GetDB(string fileName)
-        {
-            GetDBResponse response = new GetDBResponse();
-            try 
-            {
-                response.ricevute.Add(_DataBase.GetRicevuta_DB(fileName));
+        //[HttpGet]
+        //[Route("DB/{fileName}")]
+        //public IActionResult GetDB(string fileName)
+        //{
+        //    GetDBResponse response = new GetDBResponse();
+        //    try 
+        //    {
+        //        response.ricevute.Add(_DataBase.GetRicevuta_DB(fileName));
 
-                if (response.ricevute.Count == 0)
-                    return NotFound();
-                return Ok(response);
-            }
-            catch(Exception ex) 
-            { 
-                return StatusCode(500, ex); 
-            }
+        //        if (response.ricevute.Count == 0)
+        //            return NotFound();
+        //        return Ok(response);
+        //    }
+        //    catch(Exception ex) 
+        //    { 
+        //        return StatusCode(500, ex); 
+        //    }
             
-        }
+        //}
 
-        [HttpGet]
-        [Route("DB")]
-        public IActionResult GetDB()
-        {
+        //[HttpGet]
+        //[Route("DB")]
+        //public IActionResult GetDB()
+        //{
 
-            GetDBResponse response = new GetDBResponse();
-            try
-            {
-                response.ricevute = _DataBase.GetRicevute();
+        //    GetDBResponse response = new GetDBResponse();
+        //    try
+        //    {
+        //        response.ricevute = _DataBase.GetRicevute();
 
-                if (response.ricevute.Count == 0)
-                    return NotFound();
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex);
-            }
-        }
+        //        if (response.ricevute.Count == 0)
+        //            return NotFound();
+        //        return Ok(response);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, ex);
+        //    }
+        //}
 
 
         [HttpPost]
