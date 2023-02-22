@@ -354,7 +354,7 @@ namespace FatturazioneAPI.Services
                 }
             }catch(Exception e)
             {
-                return null;
+                throw e;
             }
             return result;
         }

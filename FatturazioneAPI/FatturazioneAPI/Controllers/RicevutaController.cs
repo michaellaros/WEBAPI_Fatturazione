@@ -85,15 +85,22 @@ namespace Ricevuta.Controllers
         [HttpPost]
         public IActionResult RicercaRicevuta(RicercaRicevutaRequest request) 
         {
-            if (request.IsEmpty()) return BadRequest();
-
-            RicercaRicevutaResponse response = new RicercaRicevutaResponse
+            try
             {
-                ricevute = _ricevuta.RicercaRicevuta(request)
-            };
-            if(response.ricevute == null) return StatusCode(500);
-            if(response.ricevute.Count == 0) return NotFound();
-            return Ok(response);
+                if (request.IsEmpty()) return BadRequest();
+
+                RicercaRicevutaResponse response = new RicercaRicevutaResponse
+                {
+                    ricevute = _ricevuta.RicercaRicevuta(request)
+                };
+                if (response.ricevute == null) return StatusCode(500,"Errore nel recupero ricevuta!");
+                if (response.ricevute.Count == 0) return NotFound("Nessuna ricevuta trovata!");
+                return Ok(response);
+            }catch(Exception ex)
+            {
+                return StatusCode(500,ex);
+            }
+            
         }
 
 
