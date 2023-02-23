@@ -14,72 +14,31 @@ namespace Ricevuta.Controllers
     {
         private readonly RicevutaBiz _ricevuta;
         private readonly PDFBiz _PDF;
-        
+
         public RicevutaController(IConfiguration configuration)
         {
             //_DataBase = new DataBase(configuration); //possibile miglioria? interfaccia?
             _ricevuta = new RicevutaBiz(configuration);
             _PDF = new PDFBiz(configuration);
-            
-        }
-        [HttpGet]
-        [Route("{fileName}")]
-        public IActionResult Get(string fileName)
-        {
-            RicevutaModel result = _ricevuta.RicevutaCostruction(fileName.Replace("%2F","/")); //ripristino gli / che tramite url vengono sostiuiti
-            if(result==null) return NotFound();
-            return Ok(result);
+
         }
 
         [HttpPost]
         [Route("GetRicevuta")]
         public IActionResult GetRicevuta(GetRicevutaRequest request)
         {
-            RicevutaModel result = _ricevuta.RicevutaCostruction(request.fileName);
-            if (result == null) return NotFound();
-            return Ok(result);
+            try
+            {
+                RicevutaModel result = _ricevuta.RicevutaCostruction(request.fileName);
+                if (result == null) return NotFound();
+                return Ok(result);
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
-
-        //[HttpGet]
-        //[Route("DB/{fileName}")]
-        //public IActionResult GetDB(string fileName)
-        //{
-        //    GetDBResponse response = new GetDBResponse();
-        //    try 
-        //    {
-        //        response.ricevute.Add(_DataBase.GetRicevuta_DB(fileName));
-
-        //        if (response.ricevute.Count == 0)
-        //            return NotFound();
-        //        return Ok(response);
-        //    }
-        //    catch(Exception ex) 
-        //    { 
-        //        return StatusCode(500, ex); 
-        //    }
-            
-        //}
-
-        //[HttpGet]
-        //[Route("DB")]
-        //public IActionResult GetDB()
-        //{
-
-        //    GetDBResponse response = new GetDBResponse();
-        //    try
-        //    {
-        //        response.ricevute = _DataBase.GetRicevute();
-
-        //        if (response.ricevute.Count == 0)
-        //            return NotFound();
-        //        return Ok(response);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, ex);
-        //    }
-        //}
-
 
         [HttpPost]
         public IActionResult RicercaRicevuta(RicercaRicevutaRequest request) 
@@ -88,16 +47,16 @@ namespace Ricevuta.Controllers
             {
                 if (request.IsEmpty()) return BadRequest();
 
-                RicercaRicevutaResponse response = new RicercaRicevutaResponse
+                RicercaRicevutaResponse result = new RicercaRicevutaResponse
                 {
                     ricevute = _ricevuta.RicercaRicevuta(request)
                 };
-                if (response.ricevute == null) return StatusCode(500,"Errore nel recupero ricevuta!");
-                if (response.ricevute.Count == 0) return NotFound("Nessuna ricevuta trovata!");
-                return Ok(response);
+                if (result.ricevute == null) return StatusCode(500,"Errore nel recupero ricevuta!");
+                if (result.ricevute.Count == 0) return NotFound("Nessuna ricevuta trovata!");
+                return Ok(result);
             }catch(Exception ex)
             {
-                return StatusCode(500,ex);
+                return StatusCode(500,ex.Message);
             }
             
         }

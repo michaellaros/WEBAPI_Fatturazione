@@ -25,15 +25,22 @@ namespace FatturazioneAPI.Controllers
         [HttpPost]
         public IActionResult RicercaCliente(RicercaClienteRequest request)
         {
-            if (request.IsEmpty()) return BadRequest();
-
-            RicercaClientiResponse response = new RicercaClientiResponse
+            try
             {
-                clienti = _cliente.GetClienti(request)
-            };
-            if (response.clienti == null) return StatusCode(500);
-            if (response.clienti.Count == 0) return NotFound();
-            return Ok(response);
+                if (request.IsEmpty()) return BadRequest();
+
+                RicercaClientiResponse response = new RicercaClientiResponse
+                {
+                    clienti = _cliente.GetClienti(request)
+                };
+                if (response.clienti == null) return StatusCode(500, "Errore nel recupero del cliente");
+                if (response.clienti.Count == 0) return NotFound();
+                return Ok(response);
+            }catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+            
         }
     }
 }

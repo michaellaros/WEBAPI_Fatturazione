@@ -2,6 +2,7 @@
 using FatturazioneAPI.Services;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 
 namespace FatturazioneAPI.Controllers
 {
@@ -18,22 +19,29 @@ namespace FatturazioneAPI.Controllers
 
         }
 
-        [HttpGet]
-        public IActionResult Get()
-        {
+        //[HttpGet]
+        //public IActionResult Get()
+        //{
 
-            string fileName = _PDF.GeneraFattura();
-            var stream = new FileStream(fileName, FileMode.Open);
-            return File(stream, "application/pdf");
-        }
+        //    string fileName = _PDF.GeneraFattura();
+        //    var stream = new FileStream(fileName, FileMode.Open);
+        //    return File(stream, "application/pdf");
+        //}
 
         [HttpPost]
         [Route("SendPDF")]
         public IActionResult SendPDF(SendPDFRequest request)
         {
-            string fileName = _PDF.GeneraPDFFromRicevuta(request);
-            var stream = new FileStream(fileName, FileMode.Open);
-            return File(stream, "application/pdf");
+            try
+            {
+                string fileName = _PDF.GeneraPDFFromRicevuta(request);
+                var stream = new FileStream(fileName, FileMode.Open);
+                return File(stream, "application/pdf");
+            }catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+           
         }
     }
 }
