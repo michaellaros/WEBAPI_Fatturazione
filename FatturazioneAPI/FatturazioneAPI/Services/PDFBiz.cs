@@ -33,9 +33,9 @@ namespace FatturazioneAPI.Services
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
             // Create a font
-            XFont font = new XFont("Verdana", 12, XFontStyle.BoldItalic);
+            XFont font = new XFont("Verdana", 10, XFontStyle.Regular);
 
-            int nArticoliPagina = 2;
+            int nArticoliPagina = 15;
 
             #endregion
 
@@ -83,7 +83,7 @@ namespace FatturazioneAPI.Services
                 XRect quantita = new XRect(375, 275, 100, 20);
                 XRect prezzoTot = new XRect(475, 275, 100, 20);
 
-                XVector vettArticoli = new XVector(0, 20);
+                XVector vettArticoli = new XVector(0, 25);
 
                 for (int j = i*nArticoliPagina; j < (i+1)*nArticoliPagina && j< request.Ricevuta.articoli.Count; j++)
                 {
