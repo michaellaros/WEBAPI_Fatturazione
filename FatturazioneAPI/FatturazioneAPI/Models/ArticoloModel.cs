@@ -8,7 +8,7 @@
         public decimal prezzo { get; set; }
         public decimal quantita { get; set; }
         public bool flg_isDiscount { get; set; }
-        public decimal prezzo_totale_articolo { get { return prezzo * quantita; } }
+        public decimal prezzo_totale_articolo { get { return Math.Round(prezzo * quantita,2); } }
         public IVAModel? ivaArticolo { get; set; } = null;
 
         public ArticoloModel() { }

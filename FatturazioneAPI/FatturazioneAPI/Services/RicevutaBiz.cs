@@ -43,11 +43,11 @@ namespace FatturazioneAPI.Services
                                 XmlNode ivaNode = GetIvaFromArticleId(xml, node.SelectSingleNode("Hdr/lTaCreateNmbr").InnerXml);
                                 string ivaGroup = ivaNode.SelectSingleNode("TAX/szTaxGroupRuleName").InnerXml;
                                 
-                                decimal ivaValue = ivaGroup == "Tax free" ? 0 : decimal.Parse(ivaNode.SelectSingleNode("dIncludedTaxValue").InnerXml);
+                                decimal ivaValue = ivaGroup == "Tax free" ? 0 : ivaNode.SelectSingleNode("dIncludedTaxValue") == null ? 0 : decimal.Parse(ivaNode.SelectSingleNode("dIncludedTaxValue").InnerXml.Replace(".", ","));
                                 
                                 IVAModel iva = new IVAModel(ivaGroup, ivaValue);
-                                decimal quantita = decimal.Parse(node.SelectSingleNode("dTaQty").InnerXml);
-                                decimal prezzo = Math.Round(decimal.Parse(prezzoNode.InnerXml), 2);
+                                decimal quantita = Math.Round(decimal.Parse(node.SelectSingleNode("dTaQty").InnerXml.Replace(".", ",")),2);
+                                decimal prezzo = Math.Round(decimal.Parse(prezzoNode.InnerXml.Replace(".", ",")), 2);
                                 ricevuta.articoli.Add(new ArticoloModel(codArticolo,nameArticolo, prezzo, quantita, false,iva));
 
                             }
@@ -60,7 +60,7 @@ namespace FatturazioneAPI.Services
                             if (prezzoNode != null)
                             {
                                 string nomeDiscount = node.SelectSingleNode("szDiscDesc").InnerXml;
-                                decimal quantita = decimal.Parse(node.SelectSingleNode("dDiscQty") != null ? node.SelectSingleNode("dDiscQty").InnerXml : "1");
+                                decimal quantita = decimal.Parse(node.SelectSingleNode("dDiscQty") != null ? node.SelectSingleNode("dDiscQty").InnerXml.Replace(".", ",") : "1");
                                 decimal prezzo = -decimal.Parse(prezzoNode.InnerXml.Replace(".", ","));
                                 ricevuta.articoli.Add(new ArticoloModel(nomeDiscount, prezzo, quantita, true));
                             }
