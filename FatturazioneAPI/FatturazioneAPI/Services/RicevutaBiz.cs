@@ -46,7 +46,7 @@ namespace FatturazioneAPI.Services
                                 decimal ivaValue = ivaGroup == "Tax free" ? 0 : decimal.Parse(ivaNode.SelectSingleNode("dIncludedTaxValue").InnerXml.Replace(".", ","));
                                 
                                 IVAModel iva = new IVAModel(ivaGroup, ivaValue);
-                                int quantita = int.Parse(node.SelectSingleNode("dTaQty").InnerXml);
+                                decimal quantita = decimal.Parse(node.SelectSingleNode("dTaQty").InnerXml);
                                 decimal prezzo = Math.Round(decimal.Parse(prezzoNode.InnerXml.Replace(".", ",")), 2);
                                 ricevuta.articoli.Add(new ArticoloModel(codArticolo,nameArticolo, prezzo, quantita, false,iva));
 
