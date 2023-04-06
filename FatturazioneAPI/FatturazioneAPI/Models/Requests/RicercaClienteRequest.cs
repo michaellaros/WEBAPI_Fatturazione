@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FatturazioneAPI.Models.Requests
 {
@@ -7,12 +6,15 @@ namespace FatturazioneAPI.Models.Requests
     {
         public string? clientSurname { get; set; }
         public string? clientName { get; set; }
-
+        public string? cf_piva { get; set; }
+        public string? email { get; set; }
         public DateTime? birthDate { get; set; }
-        public string? clientAdress { get; set; }
+        [JsonIgnore]
+        public string? birthDateString { get { return birthDate != null ? birthDate?.ToString("yyyy-MM-dd") : null; } }
+        public string? clientAddress { get; set; }
         public bool IsEmpty()
         {
-            return clientSurname == null && clientName == null && birthDate == null && clientAdress == null && birthDate == null;
+            return clientSurname == null && clientName == null && birthDate == null && clientAddress == null && birthDate == null;
         }
     }
 }

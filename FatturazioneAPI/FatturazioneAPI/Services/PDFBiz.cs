@@ -1,22 +1,15 @@
-﻿using Drawing = PdfSharp.Drawing;
-
-using PdfSharp.Drawing;
+﻿using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using FatturazioneAPI.Models.Requests;
-using Microsoft.Data.SqlClient;
 using PdfSharp.Drawing.Layout;
-using static System.Net.Mime.MediaTypeNames;
-using System.Drawing;
 using FatturazioneAPI.Models;
-using System.Drawing.Printing;
-using PdfSharp.Charting;
 using PdfSharp.Pdf.IO;
 
 namespace FatturazioneAPI.Services
 {
     public class PDFBiz
     {
-        readonly IConfiguration configuration;
+        private readonly IConfiguration configuration;
         private string baseFolderPDF { get { return configuration.GetSection("directories").GetValue<string>("folderPDF"); } }
 
         public PDFBiz(IConfiguration configuration)
@@ -50,9 +43,9 @@ namespace FatturazioneAPI.Services
 
             //creo pagine
 
-            int nPagine = request.Ricevuta.articoli.Count % nArticoliPagina == 0 ?  request.Ricevuta.articoli.Count / nArticoliPagina : request.Ricevuta.articoli.Count / nArticoliPagina +1;
-            
-            for(int i = 0; i< nPagine; i++)
+            int nPagine = request.Ricevuta.articoli.Count % nArticoliPagina == 0 ? request.Ricevuta.articoli.Count / nArticoliPagina : (request.Ricevuta.articoli.Count / nArticoliPagina) + 1;
+
+            for (int i = 0; i < nPagine; i++)
             {
                 document.AddPage(template);
             }
@@ -64,16 +57,16 @@ namespace FatturazioneAPI.Services
             // creo textFormatter
             XGraphics gfx = XGraphics.FromPdfPage(document.Pages[0]);
             XTextFormatter tf = new XTextFormatter(gfx);
-            tf.DrawString(request.Cliente.clientSurname, font, XBrushes.Black, new XRect(300, 150, 100, 20));
-            tf.DrawString(request.Cliente.clientName, font, XBrushes.Black, new XRect(400, 150, 100, 20));
-            tf.DrawString(request.Cliente.clientAddress, font, XBrushes.Black, new XRect(300, 180, 100, 20));
-            tf.DrawString(request.Cliente.birthDate, font, XBrushes.Black, new XRect(400, 180, 100, 20));
+            tf.DrawString(request.Cliente.surname, font, XBrushes.Black, new XRect(300, 150, 100, 20));
+            tf.DrawString(request.Cliente.name, font, XBrushes.Black, new XRect(400, 150, 100, 20));
+            tf.DrawString(request.Cliente.address, font, XBrushes.Black, new XRect(300, 180, 100, 20));
+            tf.DrawString(request.Cliente.birthday, font, XBrushes.Black, new XRect(400, 180, 100, 20));
             gfx.Dispose();
             #endregion
 
             #region inserimento articoli
 
-            for(int i = 0; i < nPagine; i++)
+            for (int i = 0; i < nPagine; i++)
             {
                 XGraphics gfxArticoli = XGraphics.FromPdfPage(document.Pages[i]);
                 XTextFormatter tfArticoli = new XTextFormatter(gfxArticoli);
@@ -85,9 +78,9 @@ namespace FatturazioneAPI.Services
 
                 XVector vettArticoli = new XVector(0, 25);
 
-                for (int j = i*nArticoliPagina; j < (i+1)*nArticoliPagina && j< request.Ricevuta.articoli.Count; j++)
+                for (int j = i * nArticoliPagina; j < (i + 1) * nArticoliPagina && j < request.Ricevuta.articoli.Count; j++)
                 {
-                    tfArticoli.DrawString(request.Ricevuta.articoli[j].cod_articolo!=null ? request.Ricevuta.articoli[j].cod_articolo : "-", font, XBrushes.Black, codice);
+                    tfArticoli.DrawString(request.Ricevuta.articoli[j].cod_articolo != null ? request.Ricevuta.articoli[j].cod_articolo : "-", font, XBrushes.Black, codice);
                     tfArticoli.DrawString(request.Ricevuta.articoli[j].desc_articolo, font, XBrushes.Black, descrizione);
                     tfArticoli.DrawString(request.Ricevuta.articoli[j].quantita.ToString(), font, XBrushes.Black, quantita);
                     tfArticoli.DrawString(request.Ricevuta.articoli[j].prezzo_totale_articolo.ToString(), font, XBrushes.Black, prezzoTot);
@@ -103,7 +96,7 @@ namespace FatturazioneAPI.Services
             #endregion
 
             #region inserimento riepilogo iva
-            XGraphics gfxIva = XGraphics.FromPdfPage(document.Pages[document.PageCount-1]);
+            XGraphics gfxIva = XGraphics.FromPdfPage(document.Pages[document.PageCount - 1]);
 
 
             XTextFormatter tfIva = new XTextFormatter(gfxIva);
@@ -113,7 +106,7 @@ namespace FatturazioneAPI.Services
 
             XVector vettIva = new XVector(0, 20);
 
-            foreach(IVAModel iva in request.Ricevuta.riepilogoIva)
+            foreach (IVAModel iva in request.Ricevuta.riepilogoIva)
             {
                 tfIva.DrawString(iva.ivaGroup, font, XBrushes.Black, group);
                 tfIva.DrawString(iva.ivaPrice.ToString(), font, XBrushes.Black, price);
@@ -126,14 +119,14 @@ namespace FatturazioneAPI.Services
             #endregion
 
             // Save the document...
-            string folderPDF = baseFolderPDF+DateTime.Now.ToString("yyyyMMdd")+@"\";
+            string folderPDF = baseFolderPDF + DateTime.Now.ToString("yyyyMMdd") + @"\";
             if (!Directory.Exists(folderPDF))
             {
                 Directory.CreateDirectory(folderPDF);
             }
-            string filename = $"{folderPDF}{request.Ricevuta.nome_ricevuta}_{request.Cliente.clientSurname}{request.Cliente.clientName}";
+            string filename = $"{folderPDF}{request.Ricevuta.nome_ricevuta}_{request.Cliente.surname}{request.Cliente.name}";
             int nameUsed = 0;
-            while(File.Exists(filename + (nameUsed == 0 ? "" : $"_{nameUsed}") + ".pdf"))
+            while (File.Exists(filename + (nameUsed == 0 ? "" : $"_{nameUsed}") + ".pdf"))
             {
                 nameUsed++;
             }
@@ -142,6 +135,6 @@ namespace FatturazioneAPI.Services
             return filename + (nameUsed == 0 ? "" : $"_{nameUsed}") + ".pdf";
         }
 
-      
+
     }
 }

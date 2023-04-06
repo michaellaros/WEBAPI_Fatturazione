@@ -1,14 +1,12 @@
 ﻿using FatturazioneAPI.Models;
 using FatturazioneAPI.Models.Requests;
-using System.IO;
-using System.Text;
 using System.Xml;
 
 namespace FatturazioneAPI.Services
 {
     public class RicevutaBiz
     {
-        readonly IConfiguration configuration;
+        private readonly IConfiguration configuration;
         private string pathCartella { get { return configuration.GetSection("appsettings").GetValue<string>("folderstring"); } }
         public RicevutaBiz(IConfiguration configuration)
         {
@@ -19,7 +17,7 @@ namespace FatturazioneAPI.Services
 
             try
             {
-                RicevutaModel ricevuta = new RicevutaModel(fileName.Substring(fileName.LastIndexOf("\\")+1).Replace(".xml",""));
+                RicevutaModel ricevuta = new RicevutaModel(fileName.Substring(fileName.LastIndexOf("\\") + 1).Replace(".xml", ""));
                 if (File.Exists(fileName))
                 {
                     XmlTextReader reader = new XmlTextReader(fileName);
@@ -35,37 +33,40 @@ namespace FatturazioneAPI.Services
                         //ciclo articoli comprati
                         foreach (XmlNode node in xml.SelectNodes("TAS/NEW_TA/ART_SALE"))
                         {
-                            XmlNode prezzoNode = node.SelectSingleNode("dTaPrice");
+                            XmlNode prezzoNode = node.SelectSingleNode("dTaTotal");
                             if (prezzoNode != null)
                             {
-                                string codArticolo =  node.SelectSingleNode("ARTICLE/szItemID").InnerXml;
+                                string codArticolo = node.SelectSingleNode("ARTICLE/szItemID").InnerXml;
                                 string nameArticolo = node.SelectSingleNode("ARTICLE/szDesc").InnerXml;
                                 XmlNode ivaNode = GetIvaFromArticleId(xml, node.SelectSingleNode("Hdr/lTaCreateNmbr").InnerXml);
                                 string ivaGroup = ivaNode.SelectSingleNode("TAX/szTaxGroupRuleName").InnerXml;
-                                
+
                                 decimal ivaValue = ivaGroup == "Tax free" ? 0 : ivaNode.SelectSingleNode("dIncludedTaxValue") == null ? 0 : decimal.Parse(ivaNode.SelectSingleNode("dIncludedTaxValue").InnerXml.Replace(".", ","));
-                                
+
                                 IVAModel iva = new IVAModel(ivaGroup, ivaValue);
-                                decimal quantita = Math.Round(decimal.Parse(node.SelectSingleNode("dTaQty").InnerXml.Replace(".", ",")),2);
+
+
+
+                                decimal quantita = Math.Round(decimal.Parse(node.SelectSingleNode("dTaQty").InnerXml.Replace(".", ",")), 2);
                                 decimal prezzo = Math.Round(decimal.Parse(prezzoNode.InnerXml.Replace(".", ",")), 2);
-                                ricevuta.articoli.Add(new ArticoloModel(codArticolo,nameArticolo, prezzo, quantita, false,iva));
+                                ricevuta.articoli.Add(new ArticoloModel(codArticolo, nameArticolo, prezzo, quantita, false, iva));
 
                             }
                         }
 
-                        //cicle discounts
-                        foreach (XmlNode node in xml.SelectNodes("TAS/NEW_TA/DISC_INFO"))
-                        {
-                            XmlNode prezzoNode = node.SelectSingleNode("dDiscValue");
-                            if (prezzoNode != null)
-                            {
-                                string nomeDiscount = node.SelectSingleNode("szDiscDesc").InnerXml;
-                                decimal quantita = decimal.Parse(node.SelectSingleNode("dDiscQty") != null ? node.SelectSingleNode("dDiscQty").InnerXml.Replace(".", ",") : "1");
-                                decimal prezzo = -decimal.Parse(prezzoNode.InnerXml.Replace(".", ","));
-                                ricevuta.articoli.Add(new ArticoloModel(nomeDiscount, prezzo, quantita, true));
-                            }
+                        ////cicle discounts
+                        //foreach (XmlNode node in xml.SelectNodes("TAS/NEW_TA/DISC_INFO"))
+                        //{
+                        //    XmlNode prezzoNode = node.SelectSingleNode("dDiscValue");
+                        //    if (prezzoNode != null)
+                        //    {
+                        //        string nomeDiscount = node.SelectSingleNode("szDiscDesc").InnerXml;
+                        //        decimal quantita = decimal.Parse(node.SelectSingleNode("dDiscQty") != null ? node.SelectSingleNode("dDiscQty").InnerXml.Replace(".", ",") : "1");
+                        //        decimal prezzo = -decimal.Parse(prezzoNode.InnerXml.Replace(".", ","));
+                        //        ricevuta.articoli.Add(new ArticoloModel(nomeDiscount, prezzo, quantita, true));
+                        //    }
 
-                        }
+                        //}
 
                         //cicle discounts
                         //foreach (XmlNode node in xml.SelectNodes("TAS/NEW_TA/DISC_INFO"))
@@ -92,17 +93,17 @@ namespace FatturazioneAPI.Services
 
                 }
                 return null;
-        }
+            }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw e;
             }
 
 
 
-}
-        
+        }
+
 
         public string GetRicevutaFromNomeFile(string? nomeFile, string? pathIn = null)
         {
@@ -112,7 +113,9 @@ namespace FatturazioneAPI.Services
             foreach (string pathElemento in fileNames)
             {
                 if (pathElemento.Contains(nomeFile))
+                {
                     return pathElemento;
+                }
             }
             string[] cartelle = Directory.GetDirectories(path);
             foreach (string pathElemento in cartelle)
@@ -134,15 +137,15 @@ namespace FatturazioneAPI.Services
             }
             return null;
         }
-        
+
 
         public List<RicevutaSelectModel> RicercaRicevuta(RicercaRicevutaRequest request)
         {
             List<RicevutaSelectModel> result = new List<RicevutaSelectModel>();
             try
             {
-                List<string> possibleFolders= new List<string>();
-                if(request.data != null)
+                List<string> possibleFolders = new List<string>();
+                if (request.data != null)
                 {
                     if (Directory.Exists($@"{pathCartella}\{request.dataString}"))
                     {
@@ -159,13 +162,14 @@ namespace FatturazioneAPI.Services
                 }
                 foreach (string folder in possibleFolders)
                 {
-                    foreach(string nomeFile in Directory.GetFiles(folder))
+                    foreach (string nomeFile in Directory.GetFiles(folder))
                     {
                         RicevutaSelectModel model = CheckRicevutaMatchFilter(nomeFile, request);
                         if (model != null) { result.Add(model); }
                     }
                 }
-            }catch(Exception e)
+            }
+            catch (Exception e)
             {
                 throw e;
             }
@@ -175,23 +179,38 @@ namespace FatturazioneAPI.Services
         public RicevutaSelectModel CheckRicevutaMatchFilter(string fileName, RicercaRicevutaRequest request)
         {
             string[] fileNameSplit = fileName.Substring(fileName.LastIndexOf(@"\") + 1).Split('_');
-            if(!string.IsNullOrEmpty( request.negozio) && fileNameSplit[0] != request.negozio)
+            if (!string.IsNullOrEmpty(request.negozio) && fileNameSplit[0] != request.negozio)
+            {
                 return null;
-            if(!string.IsNullOrEmpty(request.cassa) && fileNameSplit[1] != request.cassa)
+            }
+
+            if (!string.IsNullOrEmpty(request.cassa) && fileNameSplit[1] != request.cassa)
+            {
                 return null;
-            if(!string.IsNullOrEmpty(request.transazione) && fileNameSplit[2] != request.transazione)
+            }
+
+            if (!string.IsNullOrEmpty(request.transazione) && fileNameSplit[2] != request.transazione)
+            {
                 return null;
-            if(request.data != null && fileNameSplit[3].Substring(0, 8) != request.dataString.Substring(0,8))
+            }
+
+            if (request.data != null && fileNameSplit[3].Substring(0, 8) != request.dataString.Substring(0, 8))
+            {
                 return null;
+            }
+
             XmlDocument xml = new XmlDocument();
             xml.Load(fileName);
             if (xml.SelectSingleNode("TAS/NEW_TA/TA_CONTROL/szTaType").InnerXml != "SA")
+            {
                 return null;
-            decimal prezzoTotale = decimal.Parse(xml.SelectSingleNode("TAS/NEW_TA/TOTAL/dTotalSale").InnerXml.Replace(".",","));
+            }
+
+            decimal prezzoTotale = decimal.Parse(xml.SelectSingleNode("TAS/NEW_TA/TOTAL/dTotalSale").InnerXml.Replace(".", ","));
             return new RicevutaSelectModel()
             {
                 nomeFile = fileName,
-                prezzoTotale= prezzoTotale,
+                prezzoTotale = prezzoTotale,
             };
         }
 
@@ -199,8 +218,10 @@ namespace FatturazioneAPI.Services
         {
             foreach (XmlNode iva in xml.SelectNodes("TAS/NEW_TA/TAX_ART"))
             {
-                if(iva.SelectSingleNode("Hdr/lTaRefToCreateNmbr").InnerXml == articleId)
+                if (iva.SelectSingleNode("Hdr/lTaRefToCreateNmbr").InnerXml == articleId)
+                {
                     return iva;
+                }
             }
             return null;
         }

@@ -1,14 +1,12 @@
 ﻿using Microsoft.Data.SqlClient;
 using FatturazioneAPI.Models;
-using System;
 using FatturazioneAPI.Models.Requests;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace FatturazioneAPI.Services
 {
     public class ClientiBiz
     {
-        readonly IConfiguration configuration;
+        private readonly IConfiguration configuration;
         private SqlConnection con { get; set; }
         public ClientiBiz(IConfiguration configuration)
         {
@@ -19,25 +17,36 @@ namespace FatturazioneAPI.Services
         }
         public List<ClientiModel> GetClienti(RicercaClienteRequest request)
         {
-           
+
             List<ClientiModel> result = new List<ClientiModel>();
 
-            string query = $"select cognome,nome,data_nascita,indirizzo,email from TEST1_CLIENTE where cognome like '%{request.clientSurname}%' and nome like '%{request.clientName}%' and indirizzo like '%{request.clientAdress}%' and (data_nascita = '{request.birthDate?.AddHours(1)}' or isnull('{request.birthDate}','') = '')" ; //aggiunta un ora perche nel datepicker utilizza un fusorario diverso
+            string query = $@"select cognome,nome,cf_piva,email,data_nascita,indirizzo from TEST1_CLIENTE 
+                                where cognome like '%{request.clientSurname}%' 
+                                and nome like '%{request.clientName}%' 
+                                and indirizzo like '%{request.clientAddress}%' 
+                                and (data_nascita = '{request.birthDateString}' or isnull('{request.birthDateString}','') = '')
+                                and cf_piva like '%{request.cf_piva}%'
+                                and email like '%{request.email}%'";
             using (SqlCommand cmd = new SqlCommand(query, con))
             {
                 using (SqlDataReader reader = cmd.ExecuteReader())
                 {
                     if (!reader.HasRows)
+                    {
                         return result;
+                    }
+
                     while (reader.Read())
                     {
-                        result.Add(new ClientiModel(reader["cognome"].ToString(),
-                            reader["nome"].ToString(),
-                            DateTime.Parse(reader["data_nascita"].ToString()),
-                            reader["indirizzo"].ToString(),
-                            reader["email"].ToString()
+                        result.Add(new ClientiModel(reader["cognome"].ToString()!,
+                            reader["nome"].ToString()!,
+                            reader["cf_piva"].ToString()!,
+                            reader["email"].ToString()!,
+                            DateTime.Parse(reader["data_nascita"].ToString()!),
+                            reader["indirizzo"].ToString()!
+
                             ));
-                        
+
                     }
                 }
             }
