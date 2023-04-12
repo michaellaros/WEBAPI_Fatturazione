@@ -20,13 +20,13 @@ namespace FatturazioneAPI.Services
 
             List<ClientiModel> result = new List<ClientiModel>();
 
-            string query = $@"select cognome,nome,cf_piva,email,data_nascita,indirizzo from TEST1_CLIENTE 
-                                where cognome like '%{request.clientSurname}%' 
-                                and nome like '%{request.clientName}%' 
-                                and indirizzo like '%{request.clientAddress}%' 
-                                and (data_nascita = '{request.birthDateString}' or isnull('{request.birthDateString}','') = '')
-                                and cf_piva like '%{request.cf_piva}%'
-                                and email like '%{request.email}%'";
+            string query = $@"select szFirstBusinessName business_name,isnull(c.szTaxNmbr,c.szITFiscalCode) cf_piva, szLastName surname, szFirstName name, szITEmail email from dbo.RECEIPT_CLIENT c 
+                                where c.szFirstBusinessName like '{request.business_name}%' 
+                                and isnull(c.szTaxNmbr,c.szITFiscalCode) like '{request.cf_piva}%' 
+                                and c.szLastName like '{request.surname}%'
+                                and c.szFirstName like '{request.name}%'
+                                and c.szITEmail like '{request.email}%'
+                                order by szFirstBusinessName";
             using (SqlCommand cmd = new SqlCommand(query, con))
             {
                 using (SqlDataReader reader = cmd.ExecuteReader())
@@ -38,12 +38,11 @@ namespace FatturazioneAPI.Services
 
                     while (reader.Read())
                     {
-                        result.Add(new ClientiModel(reader["cognome"].ToString()!,
-                            reader["nome"].ToString()!,
+                        result.Add(new ClientiModel(reader["business_name"].ToString()!,
                             reader["cf_piva"].ToString()!,
-                            reader["email"].ToString()!,
-                            DateTime.Parse(reader["data_nascita"].ToString()!),
-                            reader["indirizzo"].ToString()!
+                            reader["surname"].ToString()!,
+                            reader["name"].ToString()!,
+                            reader["email"].ToString()!
 
                             ));
 

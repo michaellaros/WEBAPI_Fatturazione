@@ -59,8 +59,8 @@ namespace FatturazioneAPI.Services
             XTextFormatter tf = new XTextFormatter(gfx);
             tf.DrawString(request.Cliente.surname, font, XBrushes.Black, new XRect(300, 150, 100, 20));
             tf.DrawString(request.Cliente.name, font, XBrushes.Black, new XRect(400, 150, 100, 20));
-            tf.DrawString(request.Cliente.address, font, XBrushes.Black, new XRect(300, 180, 100, 20));
-            tf.DrawString(request.Cliente.birthday, font, XBrushes.Black, new XRect(400, 180, 100, 20));
+            tf.DrawString(request.Cliente.business_name, font, XBrushes.Black, new XRect(300, 180, 100, 20));
+            tf.DrawString(request.Cliente.cf_piva, font, XBrushes.Black, new XRect(400, 180, 100, 20));
             gfx.Dispose();
             #endregion
 
