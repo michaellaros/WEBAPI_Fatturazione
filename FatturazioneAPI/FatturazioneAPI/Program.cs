@@ -1,5 +1,4 @@
 using FatturazioneAPI.Services;
-using PdfSharp.Charting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +10,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
 builder.Services.AddSingleton<DataBase>();
+builder.Services.AddTransient<RicevutaBiz>();
+builder.Services.AddTransient<ClientiBiz>();
+builder.Services.AddTransient<PDFBiz>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

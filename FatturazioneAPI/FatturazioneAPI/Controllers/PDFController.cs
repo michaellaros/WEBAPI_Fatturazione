@@ -1,8 +1,6 @@
 ﻿using FatturazioneAPI.Models.Requests;
 using FatturazioneAPI.Services;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
 
 namespace FatturazioneAPI.Controllers
 {
@@ -13,9 +11,9 @@ namespace FatturazioneAPI.Controllers
     {
         private readonly PDFBiz _PDF;
 
-        public PDFController(IConfiguration configuration)
+        public PDFController(IConfiguration configuration, PDFBiz pdf)
         {
-            _PDF = new PDFBiz(configuration);
+            _PDF = pdf;
 
         }
 
@@ -37,11 +35,12 @@ namespace FatturazioneAPI.Controllers
                 string fileName = _PDF.GeneraPDFFromRicevuta(request);
                 var stream = new FileStream(fileName, FileMode.Open);
                 return File(stream, "application/pdf");
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
             }
-           
+
         }
     }
 }

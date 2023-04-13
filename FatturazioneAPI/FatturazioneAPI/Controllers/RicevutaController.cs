@@ -1,12 +1,10 @@
-﻿using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using FatturazioneAPI.Models;
 using FatturazioneAPI.Models.Requests;
 using FatturazioneAPI.Models.Responses;
 using FatturazioneAPI.Services;
-using System.Linq.Expressions;
 
-namespace Ricevuta.Controllers
+namespace FatturazioneAPI.Controllers
 {
     [Route("[controller]")]
     [ApiController]
@@ -15,11 +13,11 @@ namespace Ricevuta.Controllers
         private readonly RicevutaBiz _ricevuta;
         private readonly PDFBiz _PDF;
 
-        public RicevutaController(IConfiguration configuration)
+        public RicevutaController(IConfiguration configuration, PDFBiz pdf)
         {
             //_DataBase = new DataBase(configuration); //possibile miglioria? interfaccia?
             _ricevuta = new RicevutaBiz(configuration);
-            _PDF = new PDFBiz(configuration);
+            _PDF = pdf;
 
         }
 
@@ -30,7 +28,11 @@ namespace Ricevuta.Controllers
             try
             {
                 RicevutaModel result = _ricevuta.RicevutaCostruction(request.fileName);
-                if (result == null) return NotFound();
+                if (result == null)
+                {
+                    return NotFound();
+                }
+
                 return Ok(result);
 
             }
@@ -41,24 +43,36 @@ namespace Ricevuta.Controllers
         }
 
         [HttpPost]
-        public IActionResult RicercaRicevuta(RicercaRicevutaRequest request) 
+        public IActionResult RicercaRicevuta(RicercaRicevutaRequest request)
         {
             try
             {
-                if (request.IsEmpty()) return BadRequest();
+                if (request.IsEmpty())
+                {
+                    return BadRequest();
+                }
 
                 RicercaRicevutaResponse result = new RicercaRicevutaResponse
                 {
                     ricevute = _ricevuta.RicercaRicevuta(request)
                 };
-                if (result.ricevute == null) return StatusCode(500,"Errore nel recupero ricevuta!");
-                if (result.ricevute.Count == 0) return NotFound("Nessuna ricevuta trovata!");
+                if (result.ricevute == null)
+                {
+                    return StatusCode(500, "Errore nel recupero ricevuta!");
+                }
+
+                if (result.ricevute.Count == 0)
+                {
+                    return NotFound("Nessuna ricevuta trovata!");
+                }
+
                 return Ok(result);
-            }catch(Exception ex)
-            {
-                return StatusCode(500,ex.Message);
             }
-            
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+
         }
 
 
