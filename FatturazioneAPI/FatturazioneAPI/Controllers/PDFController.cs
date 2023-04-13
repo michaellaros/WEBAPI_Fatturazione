@@ -14,7 +14,6 @@ namespace FatturazioneAPI.Controllers
         public PDFController(IConfiguration configuration, PDFBiz pdf)
         {
             _PDF = pdf;
-
         }
 
         //[HttpGet]

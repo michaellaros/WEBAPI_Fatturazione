@@ -11,21 +11,21 @@ namespace FatturazioneAPI.Services
     {
         private readonly IConfiguration configuration;
         private readonly RicevutaBiz _ricevuta;
-        private readonly ClientiBiz _clienti;
+        private readonly DataBase _dataBase;
         private string baseFolderPDF { get { return configuration.GetSection("directories").GetValue<string>("folderPDF"); } }
 
-        public PDFBiz(IConfiguration configuration, RicevutaBiz ricevuta, ClientiBiz clienti)
+        public PDFBiz(IConfiguration configuration, RicevutaBiz ricevuta, DataBase dataBase)
         {
             this.configuration = configuration;
             this._ricevuta = ricevuta;
-            this._clienti = clienti;
+            this._dataBase = dataBase;
         }
 
         public string GeneraPDFFromRicevuta(SendPDFRequest request)
         {
 
             RicevutaModel receipt = _ricevuta.GetRicevuta(request.receiptName);
-            ClientiModel client = _clienti.GetCliente(request.client_id);
+            ClientiModel client = _dataBase.GetCliente(request.client_id);
             #region config
 
             //abilito lettura caratteri speciali
@@ -74,6 +74,12 @@ namespace FatturazioneAPI.Services
             tf.DrawString(client.cf_piva, font, XBrushes.Black, new XRect(111.6, 260, 100, 20));
             tf.DrawString(client.cf_piva, font, XBrushes.Black, new XRect(224.5, 260, 100, 20));
             tf.DrawString(DateTime.Now.ToString("dd/MM/yyyyy"), font, XBrushes.Black, new XRect(437.5, 260, 100, 20));
+
+            int shopNumber = int.Parse(receipt.nome_ricevuta.Split("_")[0]);
+            string receiptNumber = _dataBase.GetReceiptNumber(shopNumber).ToString("D8");
+
+            tf.DrawString($"{receiptNumber}/{shopNumber}", font, XBrushes.Black, new XRect(26, 260, 100, 20));
+
             gfx.Dispose();
             #endregion
 
@@ -180,7 +186,8 @@ namespace FatturazioneAPI.Services
             tfIva.DrawString(articleTotal.ToString(), fontTotal, XBrushes.Black, new XRect(520, 767, 50, 20));
             tfIva.DrawString(ivaTotal.ToString(), fontTotal, XBrushes.Black, new XRect(520, 779, 50, 20));
             tfIva.DrawString(receipt.prezzo_totale.ToString(), fontTotal, XBrushes.Black, new XRect(520, 791, 50, 20));
-            //tfIva.DrawString(client.cf_piva, font, XBrushes.Black, new XRect(224.5, 260, 100, 20));
+
+
 
             gfx.Dispose();
             #endregion
