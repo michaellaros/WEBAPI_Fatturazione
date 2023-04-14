@@ -56,7 +56,7 @@ namespace FatturazioneAPI.Services
                                 decimal ivaValue = ivaGroup == "Tax free" ? 0 : ivaNode.SelectSingleNode("dIncludedTaxValue") == null ? 0 : decimal.Parse(ivaNode.SelectSingleNode("dIncludedTaxValue").InnerXml.Replace(".", ","));
                                 decimal ivaPercent = ivaGroup == "Tax free" ? 0 : decimal.Parse(ivaNode.SelectSingleNode("TAX/dPercent").InnerXml.Replace(".", ","));
 
-                                IVAModel iva = new IVAModel(ivaGroup, ivaPercent, prezzo - discount - ivaValue, ivaValue);
+                                IVAModel iva = new IVAModel(ivaGroup, ivaPercent, prezzo + discount - ivaValue, ivaValue);
 
 
 

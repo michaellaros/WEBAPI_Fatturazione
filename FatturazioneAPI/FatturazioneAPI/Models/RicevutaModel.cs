@@ -11,7 +11,7 @@
                 decimal totale = 0;
                 foreach (ArticoloModel articolo in articoli)
                 {
-                    totale += articolo.prezzo_totale_articolo;
+                    totale += articolo.prezzo_totale_articolo + articolo.totalDiscount;
                 }
                 return totale;
             }
@@ -23,22 +23,20 @@
                 List<IVAModel> ivaList = new List<IVAModel>();
                 foreach (ArticoloModel articolo in articoli)
                 {
-                    bool flg_new = true;
-                    foreach (IVAModel iva in ivaList.ToList())
-                    {
-                        if (iva.ivaGroup == articolo.ivaArticolo.ivaGroup)
-                        {
-                            ivaList.RemoveAll(x => x.ivaGroup == iva.ivaGroup);
-                            iva.ivaPrice += articolo.ivaArticolo.ivaPrice;
-                            ivaList.Add(iva);
-                            flg_new = false;
-                        }
-                    }
-                    if (flg_new)
-                    {
-                        ivaList.Add(articolo.ivaArticolo);
-                    }
 
+                    IVAModel? iva = ivaList.Find(x => x.ivaGroup == articolo.ivaArticolo!.ivaGroup);
+                    if (iva != null)
+                    {
+
+                        iva.ivaPrice += articolo.ivaArticolo.ivaPrice;
+                        iva.articlePrice += articolo.ivaArticolo.articlePrice;
+
+                    }
+                    else
+                    {
+                        IVAModel ivaArticolo = articolo.ivaArticolo;
+                        ivaList.Add(new IVAModel(ivaArticolo.ivaGroup, ivaArticolo.ivaPercent, ivaArticolo.articlePrice, ivaArticolo.ivaPrice));
+                    }
                 }
                 return ivaList;
 

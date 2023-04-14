@@ -70,9 +70,15 @@ namespace FatturazioneAPI.Services
             tf.DrawString(client.district_code, font, XBrushes.Black, new XRect(529, 210, 50, 15));
 
             tf.DrawString(client.country_code, font, XBrushes.Black, new XRect(329, 225, 250, 15));
+            if (client.cf_piva.Length < 16)
+            {
+                tf.DrawString(client.cf_piva, font, XBrushes.Black, new XRect(111.6, 260, 100, 20));
+            }
+            else
+            {
+                tf.DrawString(client.cf_piva, font, XBrushes.Black, new XRect(224.5, 260, 100, 20));
+            }
 
-            tf.DrawString(client.cf_piva, font, XBrushes.Black, new XRect(111.6, 260, 100, 20));
-            tf.DrawString(client.cf_piva, font, XBrushes.Black, new XRect(224.5, 260, 100, 20));
             tf.DrawString(DateTime.Now.ToString("dd/MM/yyyyy"), font, XBrushes.Black, new XRect(437.5, 260, 100, 20));
 
             int shopNumber = int.Parse(receipt.nome_ricevuta.Split("_")[0]);
@@ -119,10 +125,10 @@ namespace FatturazioneAPI.Services
 
                     tfArticoli.Alignment = XParagraphAlignment.Right;
 
-                    tfArticoli.DrawString(article.quantita.ToString(), font, XBrushes.Black, quantita);
-                    tfArticoli.DrawString(article.prezzo.ToString(), font, XBrushes.Black, unitPrice);
-                    tfArticoli.DrawString(article.totalDiscount.ToString(), font, XBrushes.Black, totalDiscount);
-                    tfArticoli.DrawString((article.prezzo_totale_articolo + article.totalDiscount).ToString(), font, XBrushes.Black, iva);
+                    tfArticoli.DrawString(article.quantita.ToString("0.000"), font, XBrushes.Black, quantita);
+                    tfArticoli.DrawString(article.prezzo.ToString("0.00"), font, XBrushes.Black, unitPrice);
+                    tfArticoli.DrawString(article.totalDiscount.ToString("0.00"), font, XBrushes.Black, totalDiscount);
+                    tfArticoli.DrawString((article.prezzo_totale_articolo + article.totalDiscount).ToString("0.00"), font, XBrushes.Black, iva);
                     tfArticoli.DrawString((receipt.riepilogoIva.FindIndex(x => x.ivaGroup == article.ivaArticolo.ivaGroup) + 1).ToString(), font, XBrushes.Black, codIva);
 
                     tfArticoli.Alignment = XParagraphAlignment.Left;
@@ -163,9 +169,9 @@ namespace FatturazioneAPI.Services
 
                 tfIva.Alignment = XParagraphAlignment.Right;
 
-                tfIva.DrawString(iva.ivaPercent.ToString(), font, XBrushes.Black, percent);
-                tfIva.DrawString(iva.articlePrice.ToString(), font, XBrushes.Black, articlePrice);
-                tfIva.DrawString(iva.ivaPrice.ToString(), font, XBrushes.Black, price);
+                tfIva.DrawString(iva.ivaPercent.ToString("0.000"), font, XBrushes.Black, percent);
+                tfIva.DrawString(iva.articlePrice.ToString("0.00"), font, XBrushes.Black, articlePrice);
+                tfIva.DrawString(iva.ivaPrice.ToString("0.00"), font, XBrushes.Black, price);
                 tfIva.Alignment = XParagraphAlignment.Left;
 
                 tfIva.DrawString(iva.ivaGroup, font, XBrushes.Black, group);
@@ -183,9 +189,9 @@ namespace FatturazioneAPI.Services
             receipt.riepilogoIva.ForEach(iva => { articleTotal += iva.articlePrice; ivaTotal += iva.ivaPrice; });
 
             tfIva.Alignment = XParagraphAlignment.Right;
-            tfIva.DrawString(articleTotal.ToString(), fontTotal, XBrushes.Black, new XRect(520, 767, 50, 20));
-            tfIva.DrawString(ivaTotal.ToString(), fontTotal, XBrushes.Black, new XRect(520, 779, 50, 20));
-            tfIva.DrawString(receipt.prezzo_totale.ToString(), fontTotal, XBrushes.Black, new XRect(520, 791, 50, 20));
+            tfIva.DrawString(articleTotal.ToString("0.00"), fontTotal, XBrushes.Black, new XRect(520, 767, 50, 20));
+            tfIva.DrawString(ivaTotal.ToString("0.00"), fontTotal, XBrushes.Black, new XRect(520, 779, 50, 20));
+            tfIva.DrawString(receipt.prezzo_totale.ToString("0.00"), fontTotal, XBrushes.Black, new XRect(520, 791, 50, 20));
 
 
 
