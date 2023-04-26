@@ -1,4 +1,6 @@
-﻿namespace FatturazioneAPI.Models
+﻿using System.Text.Json.Serialization;
+
+namespace FatturazioneAPI.Models
 {
     public class ArticoloModel
     {
@@ -11,9 +13,19 @@
         public decimal totalDiscount { get; set; }
         public decimal prezzo_totale_articolo { get; set; }
         public IVAModel? ivaArticolo { get; set; } = null;
+        [JsonIgnore]
+        public int lTaSeqNmbr { get; set; }
+        [JsonIgnore]
+        public decimal dTaPrice { get; set; }
+        [JsonIgnore]
+        public string szPOSItemID { get; set; }
+        [JsonIgnore]
+        public string szItemLookupCode { get; set; }
+        [JsonIgnore]
+        public string szItemTaxGroupID { get; set; }
 
         public ArticoloModel() { }
-        public ArticoloModel(string cod_articolo, string desc_articolo, decimal prezzo_totale_articolo, decimal totalDiscount, decimal quantita, IVAModel ivaArticolo)
+        public ArticoloModel(string cod_articolo, string desc_articolo, decimal prezzo_totale_articolo, decimal totalDiscount, decimal quantita, IVAModel ivaArticolo, int lTaSeqNmbr, decimal dTaPrice, string szPOSItemID, string szItemLookupCode, string szItemTaxGroupID)
         {
             this.cod_articolo = cod_articolo;
             this.desc_articolo = desc_articolo;
@@ -21,6 +33,11 @@
             this.totalDiscount = totalDiscount;
             this.quantita = quantita;
             this.ivaArticolo = ivaArticolo;
+            this.lTaSeqNmbr = lTaSeqNmbr;
+            this.dTaPrice = dTaPrice;
+            this.szPOSItemID = szPOSItemID;
+            this.szItemLookupCode = szItemLookupCode;
+            this.szItemTaxGroupID = szItemTaxGroupID;
         }
 
         //public ArticoloModel(string desc_articolo, decimal prezzo, decimal quantita, bool flg_isDiscount)

@@ -26,6 +26,8 @@ namespace FatturazioneAPI.Services
 
             RicevutaModel receipt = _ricevuta.GetRicevuta(request.receiptName);
             ClientiModel client = _dataBase.GetCliente(request.client_id);
+            int shopNumber = int.Parse(receipt.nome_ricevuta.Split("_")[0]);
+            string receiptNumber = _dataBase.GetReceiptNumber(shopNumber).ToString("D8");
             #region config
 
             //abilito lettura caratteri speciali
@@ -70,19 +72,21 @@ namespace FatturazioneAPI.Services
             tf.DrawString(client.district_code, font, XBrushes.Black, new XRect(529, 210, 50, 15));
 
             tf.DrawString(client.country_code, font, XBrushes.Black, new XRect(329, 225, 250, 15));
-            if (client.cf_piva.Length < 16)
+            if (!string.IsNullOrEmpty(client.piva))
             {
-                tf.DrawString(client.cf_piva, font, XBrushes.Black, new XRect(111.6, 260, 100, 20));
+                tf.DrawString(client.piva, font, XBrushes.Black, new XRect(111.6, 260, 100, 20)); //partita iva
             }
-            else
+            else if (!string.IsNullOrEmpty(client.cf))
             {
-                tf.DrawString(client.cf_piva, font, XBrushes.Black, new XRect(224.5, 260, 100, 20));
+                tf.DrawString(client.cf, font, XBrushes.Black, new XRect(224.5, 260, 100, 20)); //cf
             }
+            else if (!string.IsNullOrEmpty(client.passport_number))
+            {
+                tf.DrawString(client.passport_number, font, XBrushes.Black, new XRect(111.6, 260, 100, 20)); //passport number in box partita iva
+            }
+            tf.DrawString(DateTime.Now.ToString("dd/MM/yyyy"), font, XBrushes.Black, new XRect(437.5, 260, 100, 20));
 
-            tf.DrawString(DateTime.Now.ToString("dd/MM/yyyyy"), font, XBrushes.Black, new XRect(437.5, 260, 100, 20));
 
-            int shopNumber = int.Parse(receipt.nome_ricevuta.Split("_")[0]);
-            string receiptNumber = _dataBase.GetReceiptNumber(shopNumber).ToString("D8");
 
             tf.DrawString($"{receiptNumber}/{shopNumber}", font, XBrushes.Black, new XRect(26, 260, 100, 20));
 
@@ -129,7 +133,7 @@ namespace FatturazioneAPI.Services
                     tfArticoli.DrawString(article.prezzo.ToString("0.00"), font, XBrushes.Black, unitPrice);
                     tfArticoli.DrawString(article.totalDiscount.ToString("0.00"), font, XBrushes.Black, totalDiscount);
                     tfArticoli.DrawString((article.prezzo_totale_articolo + article.totalDiscount).ToString("0.00"), font, XBrushes.Black, iva);
-                    tfArticoli.DrawString((receipt.riepilogoIva.FindIndex(x => x.ivaGroup == article.ivaArticolo.ivaGroup) + 1).ToString(), font, XBrushes.Black, codIva);
+                    tfArticoli.DrawString(article.ivaArticolo.groupId.ToString(), font, XBrushes.Black, codIva);
 
                     tfArticoli.Alignment = XParagraphAlignment.Left;
 
@@ -165,7 +169,7 @@ namespace FatturazioneAPI.Services
             {
                 IVAModel iva = receipt.riepilogoIva[i];
 
-                tfIva.DrawString((i + 1).ToString(), font, XBrushes.Black, index);
+                tfIva.DrawString(iva.groupId.ToString(), font, XBrushes.Black, index);
 
                 tfIva.Alignment = XParagraphAlignment.Right;
 
@@ -197,6 +201,8 @@ namespace FatturazioneAPI.Services
 
             gfx.Dispose();
             #endregion
+
+            _dataBase.InsertFattura(receipt, client.id.Value, receiptNumber);
 
             // Save the document...
             string folderPDF = baseFolderPDF + DateTime.Now.ToString("yyyyMMdd") + @"\";

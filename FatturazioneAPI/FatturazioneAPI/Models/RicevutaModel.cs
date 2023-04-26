@@ -1,9 +1,17 @@
-﻿namespace FatturazioneAPI.Models
+﻿using System.Text.Json.Serialization;
+
+namespace FatturazioneAPI.Models
 {
     public class RicevutaModel
     {
         public string nome_ricevuta { get; set; }
         public List<ArticoloModel> articoli { get; set; }
+        [JsonIgnore]
+        public string szType { get; set; }
+        [JsonIgnore]
+        public string szWorkstationID { get; set; }
+        [JsonIgnore]
+        public int lOperatorID { get; set; }
         public decimal prezzo_totale
         {
             get
@@ -30,12 +38,15 @@
 
                         iva.ivaPrice += articolo.ivaArticolo.ivaPrice;
                         iva.articlePrice += articolo.ivaArticolo.articlePrice;
+                        iva.dIncludedExactTaxValue += articolo.ivaArticolo.dIncludedExactTaxValue;
+                        iva.dTotalSale += articolo.ivaArticolo.dTotalSale;
+                        iva.dUsedTotalSale += articolo.ivaArticolo.dUsedTotalSale;
 
                     }
                     else
                     {
                         IVAModel ivaArticolo = articolo.ivaArticolo;
-                        ivaList.Add(new IVAModel(ivaArticolo.ivaGroup, ivaArticolo.ivaPercent, ivaArticolo.articlePrice, ivaArticolo.ivaPrice));
+                        ivaList.Add(new IVAModel(ivaArticolo.ivaGroup, ivaArticolo.ivaPercent, ivaArticolo.articlePrice, ivaArticolo.ivaPrice, ivaArticolo.groupId, ivaArticolo.szTaxAuthorityID, ivaArticolo.szTaxAuthorityName, ivaArticolo.szReceiptPrintCode, ivaArticolo.dIncludedExactTaxValue, ivaArticolo.dTotalSale, ivaArticolo.dUsedTotalSale));
                     }
                 }
                 return ivaList;

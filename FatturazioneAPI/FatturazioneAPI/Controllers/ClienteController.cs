@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using FatturazioneAPI.Models;
 using FatturazioneAPI.Models.Requests;
 using FatturazioneAPI.Models.Responses;
 using FatturazioneAPI.Services;
-using System.Linq.Expressions;
 
 namespace FatturazioneAPI.Controllers
 {
@@ -12,35 +10,97 @@ namespace FatturazioneAPI.Controllers
     [ApiController]
     public class ClienteController : Controller
     {
-        private readonly ClientiBiz _cliente;
-        
-        public ClienteController(IConfiguration configuration)
+        private readonly DataBase _dataBase;
+
+        public ClienteController(DataBase dataBase)
         {
-            _cliente = new ClientiBiz(configuration);
-            
+            _dataBase = dataBase;
+
         }
 
-        
+
 
         [HttpPost]
+        [Route("Search")]
         public IActionResult RicercaCliente(RicercaClienteRequest request)
         {
             try
             {
-                if (request.IsEmpty()) return BadRequest();
+                if (request.IsEmpty())
+                {
+                    return BadRequest();
+                }
 
                 RicercaClientiResponse response = new RicercaClientiResponse
                 {
-                    clienti = _cliente.GetClienti(request)
+                    clienti = _dataBase.GetClienti(request)
                 };
-                if (response.clienti == null) return StatusCode(500, "Errore nel recupero del cliente");
-                if (response.clienti.Count == 0) return NotFound();
+                if (response.clienti == null)
+                {
+                    return StatusCode(500, "Errore nel recupero del cliente");
+                }
+
+                if (response.clienti.Count == 0)
+                {
+                    return NotFound();
+                }
+
                 return Ok(response);
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
             }
-            
+
+        }
+
+        [HttpPost]
+        [Route("Insert")]
+        public IActionResult InsertCliente(ClientiModel client)
+        {
+            try
+            {
+                int client_id = _dataBase.InsertClient(client);
+                ClientiModel result = _dataBase.GetCliente(client_id);
+                if (result == null)
+                {
+                    return StatusCode(500, "Errore nel recupero del cliente creato!");
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+
+        }
+
+        [HttpPost]
+        [Route("Update")]
+        public IActionResult UpdateCliente(ClientiModel client)
+        {
+            try
+            {
+                if (!client.id.HasValue)
+                {
+                    return BadRequest();
+                }
+
+                _dataBase.UpdateClient(client);
+                ClientiModel result = _dataBase.GetCliente(client.id.Value);
+                if (result == null)
+                {
+                    return StatusCode(500, "Errore nel recupero del cliente creato!");
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+
         }
     }
 }

@@ -11,7 +11,7 @@ namespace FatturazioneAPI.Controllers
     {
         private readonly PDFBiz _PDF;
 
-        public PDFController(IConfiguration configuration, PDFBiz pdf)
+        public PDFController(PDFBiz pdf)
         {
             _PDF = pdf;
         }

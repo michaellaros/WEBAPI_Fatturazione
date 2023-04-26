@@ -30,9 +30,14 @@ namespace FatturazioneAPI.Services
                     reader.WhitespaceHandling = WhitespaceHandling.None;
                     XmlDocument xml = new XmlDocument();
                     xml.Load(fileName);
+
+                    ricevuta.szType = xml.SelectSingleNode("TAS/NEW_TA/TA_CONTROL/szTaType").InnerXml;
+                    ricevuta.szWorkstationID = xml.SelectSingleNode("TAS/NEW_TA/HEADER/szWorkstationID").InnerXml;
+                    ricevuta.lOperatorID = int.Parse(xml.SelectSingleNode("TAS/NEW_TA/HEADER/lOperatorID").InnerXml);
                     //verifico che sia di tipo sale
-                    if (xml.SelectSingleNode("TAS/NEW_TA/TA_CONTROL/szTaType").InnerXml == "SA")
+                    if (ricevuta.szType == "SA" || ricevuta.szType == "FI")
                     {
+
                         decimal totale = 0;
 
 
@@ -43,55 +48,45 @@ namespace FatturazioneAPI.Services
                             if (prezzoNode != null)
                             {
                                 string codArticolo = node.SelectSingleNode("ARTICLE/szItemID").InnerXml;
+                                string szPOSItemID = node.SelectSingleNode("ARTICLE/szPOSItemID").InnerXml;
+                                string szItemLookupCode = node.SelectSingleNode("szItemLookupCode").InnerXml;
+                                string szItemTaxGroupID = node.SelectSingleNode("ARTICLE/szItemTaxGroupID").InnerXml;
                                 string nameArticolo = node.SelectSingleNode("ARTICLE/szDesc").InnerXml;
-
+                                int lTaSeqNmbr = int.Parse(node.SelectSingleNode("Hdr/lTaSeqNmbr").InnerXml);
                                 XmlNode discountNode = node.SelectSingleNode("dTaTotalDiscounted");
-                                decimal discount = discountNode != null ? Math.Round(decimal.Parse(discountNode.InnerXml.Replace(".", ",")), 2) : 0; //get discount
-                                decimal quantita = Math.Round(decimal.Parse(node.SelectSingleNode("dTaQty").InnerXml.Replace(".", ",")), 2);
-                                decimal prezzo = Math.Round(decimal.Parse(prezzoNode.InnerXml.Replace(".", ",")), 2);
+                                decimal discount = discountNode != null ? Math.Round(decimal.Parse(discountNode.InnerXml), 2) : 0; //get discount
+                                decimal quantita = Math.Round(decimal.Parse(node.SelectSingleNode("dTaQty").InnerXml), 2);
+                                decimal prezzo = Math.Round(decimal.Parse(prezzoNode.InnerXml), 2);
+                                decimal dTaPrice = Math.Round(decimal.Parse(node.SelectSingleNode("dTaPrice").InnerXml), 2);
 
                                 XmlNode ivaNode = GetIvaFromArticleId(xml, node.SelectSingleNode("Hdr/lTaCreateNmbr").InnerXml);
                                 string ivaGroup = ivaNode.SelectSingleNode("TAX/szTaxGroupRuleName").InnerXml;
 
-                                decimal ivaValue = ivaGroup == "Tax free" ? 0 : ivaNode.SelectSingleNode("dIncludedTaxValue") == null ? 0 : decimal.Parse(ivaNode.SelectSingleNode("dIncludedTaxValue").InnerXml.Replace(".", ","));
-                                decimal ivaPercent = ivaGroup == "Tax free" ? 0 : decimal.Parse(ivaNode.SelectSingleNode("TAX/dPercent").InnerXml.Replace(".", ","));
+                                decimal ivaValue = ivaGroup == "Tax free" ? 0 : ivaNode.SelectSingleNode("dIncludedTaxValue") == null ? 0 : decimal.Parse(ivaNode.SelectSingleNode("dIncludedTaxValue").InnerXml);
 
-                                IVAModel iva = new IVAModel(ivaGroup, ivaPercent, prezzo + discount - ivaValue, ivaValue);
+                                decimal ivaPercent = ivaGroup == "Tax free" ? 0 : decimal.Parse(ivaNode.SelectSingleNode("TAX/dPercent").InnerXml);
+                                int ivaGroupId = ivaGroup == "Tax free" ? -1 : int.Parse(ivaNode.SelectSingleNode("TAX/szTaxGroupID").InnerXml);
+
+                                #region For Receipt
+
+                                string szTaxAuthorityID = ivaNode.SelectSingleNode("TAX/szTaxAuthorityID").InnerXml;
+                                string szTaxAuthorityName = ivaNode.SelectSingleNode("TAX/szTaxAuthorityName").InnerXml;
+                                string szReceiptPrintCode = ivaNode.SelectSingleNode("TAX/szReceiptPrintCode").InnerXml;
+                                decimal dIncludedExactTaxValue = ivaGroup == "Tax free" ? 0 : ivaNode.SelectSingleNode("dIncludedExactTaxValue") == null ? 0 : decimal.Parse(ivaNode.SelectSingleNode("dIncludedExactTaxValue").InnerXml);
+                                decimal dTotalSale = decimal.Parse(ivaNode.SelectSingleNode("dTotalSale").InnerXml);
+                                decimal dUsedTotalSale = decimal.Parse(ivaNode.SelectSingleNode("dUsedTotalSale").InnerXml);
+
+
+                                #endregion
+
+                                IVAModel iva = new IVAModel(ivaGroup, ivaPercent, prezzo + discount - ivaValue, ivaValue, ivaGroupId, szTaxAuthorityID, szTaxAuthorityName, szReceiptPrintCode, dIncludedExactTaxValue, dTotalSale, dUsedTotalSale);
 
 
 
-                                ricevuta.articoli.Add(new ArticoloModel(codArticolo, nameArticolo, prezzo, discount, quantita, iva));
+                                ricevuta.articoli.Add(new ArticoloModel(codArticolo, nameArticolo, prezzo, discount, quantita, iva, lTaSeqNmbr, dTaPrice, szPOSItemID, szItemLookupCode, szItemTaxGroupID));
 
                             }
                         }
-
-                        ////cicle discounts
-                        //foreach (XmlNode node in xml.SelectNodes("TAS/NEW_TA/DISC_INFO"))
-                        //{
-                        //    XmlNode prezzoNode = node.SelectSingleNode("dDiscValue");
-                        //    if (prezzoNode != null)
-                        //    {
-                        //        string nomeDiscount = node.SelectSingleNode("szDiscDesc").InnerXml;
-                        //        decimal quantita = decimal.Parse(node.SelectSingleNode("dDiscQty") != null ? node.SelectSingleNode("dDiscQty").InnerXml.Replace(".", ",") : "1");
-                        //        decimal prezzo = -decimal.Parse(prezzoNode.InnerXml.Replace(".", ","));
-                        //        ricevuta.articoli.Add(new ArticoloModel(nomeDiscount, prezzo, quantita, true));
-                        //    }
-
-                        //}
-
-                        //cicle discounts
-                        //foreach (XmlNode node in xml.SelectNodes("TAS/NEW_TA/DISC_INFO"))
-                        //{
-                        //    XmlNode prezzoNode = node.SelectSingleNode("dDiscValue");
-                        //    if (prezzoNode != null)
-                        //    {
-                        //        string nomeDiscount = node.SelectSingleNode("szDiscDesc").InnerXml;
-                        //        int quantita = int.Parse(node.SelectSingleNode("dDiscQty") != null ? node.SelectSingleNode("dDiscQty").InnerXml : "1");
-                        //        decimal prezzo = -decimal.Parse(prezzoNode.InnerXml.Replace(".", ","));
-                        //        ricevuta.articoli.Add(new ArticoloModel(nomeDiscount, prezzo, quantita, true));
-                        //    }
-
-                        //}
 
                         return ricevuta;
 
@@ -217,7 +212,7 @@ namespace FatturazioneAPI.Services
                 return null;
             }
 
-            decimal prezzoTotale = decimal.Parse(xml.SelectSingleNode("TAS/NEW_TA/TOTAL/dTotalSale").InnerXml.Replace(".", ","));
+            decimal prezzoTotale = decimal.Parse(xml.SelectSingleNode("TAS/NEW_TA/TOTAL/dTotalSale").InnerXml);
             return new RicevutaSelectModel()
             {
                 nomeFile = fileName,
@@ -237,197 +232,7 @@ namespace FatturazioneAPI.Services
             return null;
         }
 
-        #region vecchio codice
-        //public string? GetRicevuta(string id, string? pathIn = null)
-        //{
-        //    string path = string.IsNullOrEmpty(pathIn) ? pathCartella : pathIn;
-        //    string[] fileNames = Directory.GetFiles(path);
 
-        //    foreach (string pathElemento in fileNames)
-        //    {
-        //        if (File.Exists(pathElemento))
-        //        {
-        //            XmlDocument xml = new XmlDocument();
-        //            xml.Load(pathElemento);
-        //            string idFile = xml.SelectSingleNode("TAS/NEW_TA/TA_CONTROL/szUniqueID").InnerXml;
-        //            if (idFile == id)
-        //                return pathElemento;
-        //        }
-
-        //        else
-        //        {
-        //            Console.WriteLine("{0} is not a valid file or directory.", pathElemento);
-        //        }
-        //    }
-        //    string[] cartelle = Directory.GetDirectories(path);
-        //    foreach (string pathElemento in cartelle)
-        //    {
-        //        if (Directory.Exists(pathElemento))
-        //        {
-        //            // This path is a directory
-        //            string? pathTrovato = GetRicevuta(id, pathElemento);
-        //            if (!string.IsNullOrEmpty(pathTrovato))
-        //            {
-        //                return pathTrovato;
-        //            }
-        //        }
-
-        //        else
-        //        {
-        //            Console.WriteLine("{0} is not a valid file or directory.", pathElemento);
-        //        }
-        //    }
-        //    return null;
-        //}
-
-        //public static void stampaPrintBuffer(string path)
-        //{
-        //    try
-        //    {
-        //        if (File.Exists(path))
-        //        {
-        //            XmlTextReader reader = new XmlTextReader(path);
-        //            reader.WhitespaceHandling = WhitespaceHandling.None;
-        //            XmlDocument xml = new XmlDocument();
-        //            xml.Load(path);
-        //            string printBuffer = xml.SelectSingleNode("TAS/PrintBuffer").InnerXml;
-        //            byte[] converted = Convert.FromBase64String(printBuffer);
-        //            Console.WriteLine(Encoding.UTF8.GetString(converted));
-        //        }
-
-        //        else
-        //        {
-        //            Console.WriteLine("{0} is not a valid file or directory.", path);
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.WriteLine("{0} is not a valid file or directory with error {1}.", path, e.Message);
-        //    }
-
-
-        //}
-        //public string StampaCheckTotale(string path)
-        //{
-        //    try
-        //    {
-        //        StringBuilder result = new StringBuilder();
-        //        if (File.Exists(path))
-        //        {
-        //            XmlDocument xml = new XmlDocument();
-        //            xml.Load(path);
-        //            //verifico che sia di tipo sale
-        //            if (xml.SelectSingleNode("TAS/NEW_TA/TA_CONTROL/szTaType").InnerXml == "SA")
-        //            {
-        //                decimal totale = 0;
-        //                string[] pathSplit = path.Split("\\");
-
-        //                result.Append(string.Format("=====================================\nfile {0} nella cartella {1}\n", pathSplit[pathSplit.Length - 1], pathSplit[pathSplit.Length - 2]));
-
-        //                //ciclo articoli comprati
-        //                foreach (XmlNode node in xml.SelectNodes("TAS/NEW_TA/ART_SALE"))
-        //                {
-        //                    XmlNode prezzoNode = node.SelectSingleNode("dTaPrice");
-        //                    if (prezzoNode != null)
-        //                    {
-        //                        string articolo = node.SelectSingleNode("ARTICLE/szDesc").InnerXml;
-        //                        int quantita = int.Parse(node.SelectSingleNode("dTaQty").InnerXml);
-        //                        decimal prezzo = Math.Round(decimal.Parse(prezzoNode.InnerXml.Replace(".", ",")), 2);
-        //                        decimal totArticolo = prezzo * quantita;
-        //                        result.Append(string.Format("{0}   {1}   {2}   {3}\n", articolo, quantita, prezzo, totArticolo));
-        //                        totale += totArticolo;
-        //                    }
-        //                }
-
-        //                //cicle discounts
-        //                foreach (XmlNode node in xml.SelectNodes("TAS/NEW_TA/DISC_INFO"))
-        //                {
-        //                    XmlNode prezzoNode = node.SelectSingleNode("dDiscValue");
-        //                    if (prezzoNode != null)
-        //                    {
-        //                        string discount = node.SelectSingleNode("szDiscDesc").InnerXml;
-        //                        int quantita = int.Parse(node.SelectSingleNode("dDiscQty") != null ? node.SelectSingleNode("dDiscQty").InnerXml : "1");
-        //                        decimal prezzo = -decimal.Parse(prezzoNode.InnerXml.Replace(".", ","));
-        //                        decimal totDiscount = prezzo * quantita;
-        //                        result.Append(string.Format("{0}   {1}   {2}   {3}\n", discount, quantita, prezzo, totDiscount));
-        //                        totale += totDiscount;
-        //                    }
-
-        //                }
-        //                totale = Math.Round(totale, 2);
-        //                result.Append(string.Format("Totale calcolato: {0}\n", totale));
-        //                XmlNode totaleNode = xml.SelectSingleNode("TAS/NEW_TA/TOTAL/dTotalSale");
-        //                if (totaleNode != null)
-        //                {
-        //                    result.Append(string.Format("Totale scontrino: {0}\n", decimal.Parse(totaleNode.InnerXml.Replace(".", ","))));
-        //                    if (decimal.Parse(totaleNode.InnerXml.Replace(".", ",")) == totale)
-        //                        result.Append("Totale calcolato uguale a totale su scontrino");
-        //                    else
-        //                        result.Append("Totale calcolato diverso a totale su scontrino");
-        //                }
-
-
-        //            }
-
-        //        }
-
-        //        else
-        //        {
-        //            Console.WriteLine("{0} is not a valid file or directory.", path);
-        //        }
-        //        return result.ToString();
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return string.Format("{0} is not a valid file or directory with error {1}.", path, e.Message);
-        //    }
-
-
-
-        //}
-
-        //public void CicleCartella(string path)
-        //{
-        //    string[] cartelle = Directory.GetDirectories(path);
-        //    foreach (string pathElemento in cartelle)
-        //    {
-
-        //        if (pathElemento.StartsWith("-"))
-        //        {
-        //            Console.WriteLine(pathElemento);
-        //        }
-        //        else if (Directory.Exists(pathElemento))
-        //        {
-        //            // This path is a directory
-        //            CicleCartella(pathElemento);
-        //        }
-        //        else if (File.Exists(pathElemento))
-        //            StampaCheckTotale(pathElemento);
-        //        else
-        //        {
-        //            Console.WriteLine("{0} is not a valid file or directory.", pathElemento);
-        //        }
-        //    }
-
-
-        //    string[] file = Directory.GetFiles(path);
-        //    foreach (string pathElemento in file)
-        //    {
-
-        //        if (Directory.Exists(pathElemento))
-        //        {
-        //            // This path is a directory
-        //            CicleCartella(pathElemento);
-        //        }
-        //        else if (File.Exists(pathElemento))
-        //            StampaCheckTotale(pathElemento);
-        //        else
-        //        {
-        //            Console.WriteLine("{0} is not a valid file or directory.", pathElemento);
-        //        }
-        //    }
-        //}
-        #endregion
 
     }
 }

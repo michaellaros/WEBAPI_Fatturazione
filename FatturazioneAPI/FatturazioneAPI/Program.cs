@@ -1,4 +1,5 @@
 using FatturazioneAPI.Services;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,18 +10,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
-builder.Services.AddSingleton<DataBase>();
+builder.Services.AddTransient<DataBase>();
 builder.Services.AddTransient<RicevutaBiz>();
-builder.Services.AddTransient<ClientiBiz>();
 builder.Services.AddTransient<PDFBiz>();
+CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
+CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.UseCors(options => options.AllowAnyHeader()
                               .AllowAnyMethod()
                               .AllowAnyOrigin()
