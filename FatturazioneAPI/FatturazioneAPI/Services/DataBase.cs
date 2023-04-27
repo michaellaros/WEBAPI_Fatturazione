@@ -28,20 +28,25 @@ namespace FatturazioneAPI.Services
                                     ,c.szITPassportNmbr passport_number
                                     , szLastName surname
                                     , szFirstName name
+                                    , szCustomerID client_id
                                     , szITEmail email 
+                                    , szITNumTel tel_number
+                                    , szPhoneNmbr cel_number
                                     , szStreetName address
-                                    ,szCityName city
-                                    ,szPostalLocationZipCode zipcode
-                                    ,szITPostalLocationDistrictCode district_code
-                                    ,szITPostalLocationCountryCode country_code
+                                    , szCityName city
+                                    , szPostalLocationZipCode zipcode
+                                    , szITPostalLocationDistrictCode district_code
+                                    , szITPostalLocationCountryCode country_code
+                                    , szITCodDestinazione cod_destionazione
+                                    , szITNote note
                                 from dbo.ITInvoiceCustomerInfo c  
-                                where isnull(c.szFirstBusinessName,'') like '{request.business_name}%' 
-                                    and (c.szTaxNmbr like '{request.cf_piva_passport}%'
-                                        or c.szITFiscalCode like '{request.cf_piva_passport}%'
-                                        or c.szITPassportNmbr like '{request.cf_piva_passport}%') 
-                                    and isnull(c.szLastName,'') like '{request.surname}%'
-                                    and isnull(c.szFirstName,'') like '{request.name}%'
-                                    and isnull(c.szITEmail,'') like '{request.email}%'
+                                where isnull(c.szFirstBusinessName,'') like '%{request.business_name}%' 
+                                    and (c.szTaxNmbr like '%{request.cf_piva_passport}%'
+                                        or c.szITFiscalCode like '%{request.cf_piva_passport}%'
+                                        or c.szITPassportNmbr like '%{request.cf_piva_passport}%') 
+                                    and isnull(c.szLastName,'') like '%{request.surname}%'
+                                    and isnull(c.szFirstName,'') like '%{request.name}%'
+                                    and isnull(c.szITEmail,'') like '%{request.email}%'
                                 order by szFirstBusinessName";
             using (SqlCommand cmd = new SqlCommand(query, con))
             {
@@ -61,13 +66,17 @@ namespace FatturazioneAPI.Services
                             reader["passport_number"].ToString()!,
                             reader["surname"].ToString()!,
                             reader["name"].ToString()!,
+                            reader["client_id"].ToString()!,
                             reader["email"].ToString()!,
+                            reader["tel_number"].ToString()!,
+                            reader["cel_number"].ToString()!,
                             reader["address"].ToString()!,
                             reader["city"].ToString()!,
                             reader["zipcode"].ToString()!,
                             reader["district_code"].ToString()!,
-                            reader["country_code"].ToString()!
-
+                            reader["country_code"].ToString()!,
+                            reader["cod_destionazione"].ToString()!,
+                            reader["note"].ToString()!
                             ));
 
                     }
@@ -81,17 +90,22 @@ namespace FatturazioneAPI.Services
 
             string query = $@"select client_id,
                                     szFirstBusinessName business_name
-                                    , c.szTaxNmbr piva
-                                    , c.szITFiscalCode cf
-                                    , c.szITPassportNmbr passport_number
+                                    ,c.szTaxNmbr piva
+                                    ,c.szITFiscalCode cf
+                                    ,c.szITPassportNmbr passport_number
                                     , szLastName surname
                                     , szFirstName name
+                                    , szCustomerID client_id
                                     , szITEmail email 
+                                    , szITNumTel tel_number
+                                    , szPhoneNmbr cel_number
                                     , szStreetName address
-                                    ,szCityName city
-                                    ,szPostalLocationZipCode zipcode
-                                    ,szITPostalLocationDistrictCode district_code
-                                    ,szITPostalLocationCountryCode country_code
+                                    , szCityName city
+                                    , szPostalLocationZipCode zipcode
+                                    , szITPostalLocationDistrictCode district_code
+                                    , szITPostalLocationCountryCode country_code
+                                    , szITCodDestinazione cod_destionazione
+                                    , szITNote note
                                 from dbo.ITInvoiceCustomerInfo c  
                                 where c.client_id = {client_id}";
             using (SqlCommand cmd = new SqlCommand(query, con))
@@ -112,12 +126,17 @@ namespace FatturazioneAPI.Services
                             reader["passport_number"].ToString()!,
                             reader["surname"].ToString()!,
                             reader["name"].ToString()!,
+                            reader["client_id"].ToString()!,
                             reader["email"].ToString()!,
+                            reader["tel_number"].ToString()!,
+                            reader["cel_number"].ToString()!,
                             reader["address"].ToString()!,
                             reader["city"].ToString()!,
                             reader["zipcode"].ToString()!,
                             reader["district_code"].ToString()!,
-                            reader["country_code"].ToString()!
+                            reader["country_code"].ToString()!,
+                            reader["cod_destionazione"].ToString()!,
+                            reader["note"].ToString()!
 
                             );
                     }
@@ -126,7 +145,7 @@ namespace FatturazioneAPI.Services
             return null;
         }
 
-        public int GetReceiptNumber(int shopNumber)
+        public int GetReceiptNumber(string shopNumber)
         {
             string query = $@"select NEXT VALUE FOR dbo.GelMarket_Receipt_S{shopNumber} as receiptNumber";
             using (SqlCommand cmd = new SqlCommand(query, con))
@@ -148,16 +167,41 @@ namespace FatturazioneAPI.Services
             return -1;
         }
 
-        public void InsertFattura(RicevutaModel receipt, int client_id, string receiptNumber)
+        public string InsertFattura(RicevutaModel receipt, int client_id)
 
         {
+
             SqlTransaction sqlTransaction = con.BeginTransaction();
             try
             {
                 string[] receiptNameSplit = receipt.nome_ricevuta.Split("_");
                 int invoiceYear = DateTime.Now.Year;
 
-                string insertITIvoiceFooter = $@"INSERT INTO [dbo].[ITInvoiceFooter]
+                string getReceiptNumber = $@"select NEXT VALUE FOR dbo.GelMarket_Receipt_S{receiptNameSplit[0]} as receiptNumber";
+                string receiptNumber;
+
+
+                using (SqlCommand cmd = new SqlCommand(getReceiptNumber, con, sqlTransaction))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (!reader.HasRows)
+                        {
+                            throw new Exception("Query didn't succeed");
+                        }
+
+                        if (!reader.Read())
+                        {
+                            throw new Exception("Query didn't succeed");
+                        }
+
+                        receiptNumber = reader["receiptNumber"].ToString();
+                        receiptNumber = "00000000".Substring(0, 8 - receiptNumber.Length) + receiptNumber;
+
+
+                    }
+
+                    string insertITIvoiceFooter = $@"INSERT INTO [dbo].[ITInvoiceFooter]
                                                        ([lRetailStoreID]
                                                        ,[lInvoiceYear]
                                                        ,[szInvoiceNmbr]
@@ -176,12 +220,7 @@ namespace FatturazioneAPI.Services
                                                        ,{receipt.lOperatorID}
                                                        ,{GetStringOrNull(receipt.szWorkstationID)})";
 
-                using (SqlCommand cmd = new SqlCommand(insertITIvoiceFooter, con, sqlTransaction))
-                {
-
-
-
-
+                    cmd.CommandText = insertITIvoiceFooter;
                     int resultITIvoiceFooter = cmd.ExecuteNonQuery();
                     if (resultITIvoiceFooter <= 0) { throw new Exception("Query didn't succeed"); }
 
@@ -399,6 +438,7 @@ namespace FatturazioneAPI.Services
                     if (resultITInvoiceTxJournal <= 0) { throw new Exception("Query didn't succeed"); }
 
                     sqlTransaction.Commit();
+                    return receiptNumber;
                 }
             }
             catch (Exception ex)
@@ -426,7 +466,7 @@ namespace FatturazioneAPI.Services
                                        ,[szStreetName]
                                        ,[szCityName]
                                        ,[szPostalLocationZipCode]
-                                       ,[szLanguageCode]
+                                       ,[szITCodDestinazione]
                                        ,[szITPostalLocationDistrictCode]
                                        ,[szITPostalLocationCountryCode]
                                        ,[szITNote])
@@ -444,7 +484,7 @@ namespace FatturazioneAPI.Services
                                        ,{GetStringOrNull(client.address)}
                                        ,{GetStringOrNull(client.city)}
                                        ,{GetStringOrNull(client.zipcode)}
-                                       ,{GetStringOrNull(client.lang_code)}
+                                       ,{GetStringOrNull(client.cod_destinazione)}
                                        ,{GetStringOrNull(client.district_code)}
                                        ,{GetStringOrNull(client.country_code)}
                                        ,{GetStringOrNull(client.note)})";
@@ -497,10 +537,10 @@ namespace FatturazioneAPI.Services
                                           ,[szStreetName] = {GetStringOrNull(client.address)}
                                           ,[szCityName] = {GetStringOrNull(client.city)}
                                           ,[szPostalLocationZipCode] = {GetStringOrNull(client.zipcode)}
-                                          ,[szLanguageCode] = {GetStringOrNull(client.lang_code)}
+                                          ,[szITCodDestinazione] = {GetStringOrNull(client.cod_destinazione)}
                                           ,[szITPostalLocationDistrictCode] = {GetStringOrNull(client.district_code)}
                                           ,[szITPostalLocationCountryCode] = {GetStringOrNull(client.country_code)}
-                                          ,[szITCodDestinazione] = {GetStringOrNull(client.note)}
+                                          ,[szITNote] = {GetStringOrNull(client.note)}
                                           ,[Update_date] = GETDATE()
                                         WHERE client_id = {client.id}";
 

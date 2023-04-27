@@ -27,7 +27,7 @@ namespace FatturazioneAPI.Services
             RicevutaModel receipt = _ricevuta.GetRicevuta(request.receiptName);
             ClientiModel client = _dataBase.GetCliente(request.client_id);
             int shopNumber = int.Parse(receipt.nome_ricevuta.Split("_")[0]);
-            string receiptNumber = _dataBase.GetReceiptNumber(shopNumber).ToString("D8");
+
             #region config
 
             //abilito lettura caratteri speciali
@@ -58,40 +58,7 @@ namespace FatturazioneAPI.Services
 
             #endregion
 
-            #region Inserimento intestazione
 
-            // creo textFormatter
-            XGraphics gfx = XGraphics.FromPdfPage(document.Pages[0]);
-            XTextFormatter tf = new XTextFormatter(gfx);
-            tf.DrawString(client.business_name, font, XBrushes.Black, new XRect(329, 165, 250, 15));
-            tf.DrawString($"{client.surname} {client.name}", font, XBrushes.Black, new XRect(329, 180, 250, 15));
-            tf.DrawString(client.address, font, XBrushes.Black, new XRect(329, 195, 250, 15));
-
-            tf.DrawString(client.zipcode, font, XBrushes.Black, new XRect(329, 210, 50, 15));
-            tf.DrawString(client.city, font, XBrushes.Black, new XRect(379, 210, 150, 15));
-            tf.DrawString(client.district_code, font, XBrushes.Black, new XRect(529, 210, 50, 15));
-
-            tf.DrawString(client.country_code, font, XBrushes.Black, new XRect(329, 225, 250, 15));
-            if (!string.IsNullOrEmpty(client.piva))
-            {
-                tf.DrawString(client.piva, font, XBrushes.Black, new XRect(111.6, 260, 100, 20)); //partita iva
-            }
-            else if (!string.IsNullOrEmpty(client.cf))
-            {
-                tf.DrawString(client.cf, font, XBrushes.Black, new XRect(224.5, 260, 100, 20)); //cf
-            }
-            else if (!string.IsNullOrEmpty(client.passport_number))
-            {
-                tf.DrawString(client.passport_number, font, XBrushes.Black, new XRect(111.6, 260, 100, 20)); //passport number in box partita iva
-            }
-            tf.DrawString(DateTime.Now.ToString("dd/MM/yyyy"), font, XBrushes.Black, new XRect(437.5, 260, 100, 20));
-
-
-
-            tf.DrawString($"{receiptNumber}/{shopNumber}", font, XBrushes.Black, new XRect(26, 260, 100, 20));
-
-            gfx.Dispose();
-            #endregion
 
             #region inserimento articoli
 
@@ -197,12 +164,48 @@ namespace FatturazioneAPI.Services
             tfIva.DrawString(ivaTotal.ToString("0.00"), fontTotal, XBrushes.Black, new XRect(520, 779, 50, 20));
             tfIva.DrawString(receipt.prezzo_totale.ToString("0.00"), fontTotal, XBrushes.Black, new XRect(520, 791, 50, 20));
 
+            tfIva.Alignment = XParagraphAlignment.Left;
+
+            gfxIva.Dispose();
+
+            #endregion
+
+            #region Inserimento intestazione
+
+            // creo textFormatter
+            XGraphics gfx = XGraphics.FromPdfPage(document.Pages[0]);
+            XTextFormatter tf = new XTextFormatter(gfx);
+            tf.DrawString(client.business_name, font, XBrushes.Black, new XRect(329, 165, 250, 15));
+            tf.DrawString($"{client.surname} {client.name}", font, XBrushes.Black, new XRect(329, 180, 250, 15));
+            tf.DrawString(client.address, font, XBrushes.Black, new XRect(329, 195, 250, 15));
+
+            tf.DrawString(client.zipcode, font, XBrushes.Black, new XRect(329, 210, 50, 15));
+            tf.DrawString(client.city, font, XBrushes.Black, new XRect(379, 210, 150, 15));
+            tf.DrawString(client.district_code, font, XBrushes.Black, new XRect(529, 210, 50, 15));
+
+            tf.DrawString(client.country_code, font, XBrushes.Black, new XRect(329, 225, 250, 15));
+            if (!string.IsNullOrEmpty(client.piva))
+            {
+                tf.DrawString(client.piva, font, XBrushes.Black, new XRect(111.6, 260, 100, 20)); //partita iva
+            }
+            else if (!string.IsNullOrEmpty(client.cf))
+            {
+                tf.DrawString(client.cf, font, XBrushes.Black, new XRect(224.5, 260, 100, 20)); //cf
+            }
+            else if (!string.IsNullOrEmpty(client.passport_number))
+            {
+                tf.DrawString(client.passport_number, font, XBrushes.Black, new XRect(111.6, 260, 100, 20)); //passport number in box partita iva
+            }
+            tf.DrawString(DateTime.Now.ToString("dd/MM/yyyy"), font, XBrushes.Black, new XRect(437.5, 260, 100, 20));
+
+            string receiptNumber = _dataBase.InsertFattura(receipt, client.id.Value);//_dataBase.GetReceiptNumber(shopNumber).ToString("D8");
+            tf.DrawString($"{receiptNumber}/{shopNumber}", font, XBrushes.Black, new XRect(26, 260, 100, 20));
+
 
 
             gfx.Dispose();
             #endregion
 
-            _dataBase.InsertFattura(receipt, client.id.Value, receiptNumber);
 
             // Save the document...
             string folderPDF = baseFolderPDF + DateTime.Now.ToString("yyyyMMdd") + @"\";
