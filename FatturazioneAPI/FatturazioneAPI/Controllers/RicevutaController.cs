@@ -12,10 +12,11 @@ namespace FatturazioneAPI.Controllers
     {
         private readonly RicevutaBiz _ricevuta;
         private readonly PDFBiz _PDF;
+        private readonly DataBase _dataBase;
 
-        public RicevutaController(IConfiguration configuration, PDFBiz pdf)
+        public RicevutaController(IConfiguration configuration, PDFBiz pdf, DataBase dataBase)
         {
-            //_DataBase = new DataBase(configuration); //possibile miglioria? interfaccia?
+            _dataBase = dataBase; //possibile miglioria? interfaccia?
             _ricevuta = new RicevutaBiz(configuration);
             _PDF = pdf;
 
@@ -56,12 +57,45 @@ namespace FatturazioneAPI.Controllers
                 {
                     ricevute = _ricevuta.RicercaRicevuta(request)
                 };
+                if (result.ricevute.Count == 0)
+                {
+                    return NotFound("Nessuna ricevuta trovata!");
+                }
+                result.ricevute = _dataBase.RemoveReceiptWithInvoice(result.ricevute);
                 if (result.ricevute == null)
                 {
                     return StatusCode(500, "Errore nel recupero ricevuta!");
                 }
 
                 if (result.ricevute.Count == 0)
+                {
+                    return NotFound("Nessuna ricevuta trovata!");
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+
+        }
+
+        [HttpPost]
+        [Route("Storico")]
+        public IActionResult RicercaStoricoRicevuta(RicercaRicevutaStoricoRequest request)
+        {
+            try
+            {
+
+                List<RicevutaStoricoModel> result = _dataBase.RicercaRicevutaStorico(request);
+
+                if (result == null)
+                {
+                    return StatusCode(500, "Errore nel recupero storico ricevuta!");
+                }
+
+                if (result.Count == 0)
                 {
                     return NotFound("Nessuna ricevuta trovata!");
                 }

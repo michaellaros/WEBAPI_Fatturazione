@@ -1,6 +1,7 @@
 ﻿using FatturazioneAPI.Models.Requests;
 using FatturazioneAPI.Models;
 using Microsoft.Data.SqlClient;
+using FatturazioneAPI.Models.Responses;
 
 namespace FatturazioneAPI.Services
 {
@@ -167,7 +168,7 @@ namespace FatturazioneAPI.Services
             return -1;
         }
 
-        public string InsertFattura(RicevutaModel receipt, int client_id)
+        public string InsertFattura(RicevutaModel receipt, int client_id, GetInfoTransazioneRequest? receiptInfo = null)
 
         {
 
@@ -209,16 +210,26 @@ namespace FatturazioneAPI.Services
                                                        ,[szDate]
                                                        ,[lInvoiceType]
                                                        ,[lOperatorID]
-                                                       ,[szWorkstationID])
+                                                       ,[szWorkstationID]
+                                {(receiptInfo != null ? @",[lParentRetailStoreID]
+                                                        ,[lParentInvoiceYear]
+                                                        ,[szParentInvoiceNmbr]
+                                                            ,[szParentUsageID]" : "")})
                                                  VALUES
                                                        ({receiptNameSplit[0]}
                                                            ,{invoiceYear}
                                                            ,'{receiptNumber}'
                                                            ,'IT_INVOICE'
                                                        ,'{DateTime.Now.ToString("yyyyMMdd")}'
-                                                       ,0
+                                                       ,{(receiptInfo != null ? 1 : 0)/*SZTYPE 0 = FATTURA, 1 = NOTA DI CREDITO*/}
                                                        ,{receipt.lOperatorID}
-                                                       ,{GetStringOrNull(receipt.szWorkstationID)})";
+                                                       ,{GetStringOrNull(receipt.szWorkstationID)}
+                            {(receiptInfo != null ? @$",{receiptInfo.store_id}
+                                                        ,{receiptInfo.receipt_year}
+                                                        ,{receiptInfo.receipt_number}
+                                                        ,'IT_INVOICE'" : "")})";
+
+
 
                     cmd.CommandText = insertITIvoiceFooter;
                     int resultITIvoiceFooter = cmd.ExecuteNonQuery();
@@ -396,7 +407,7 @@ namespace FatturazioneAPI.Services
                                                            ,{GetStringOrNull(iva.szTaxAuthorityID)}
                                                            ,{GetStringOrNull(iva.szTaxAuthorityName)}
                                                            ,'{iva.ivaPercent}'
-                                                           ,{GetStringOrNull(iva.szReceiptPrintCode)}
+                                                           ,null
                                                            ,{iva.ivaPrice}
                                                            ,{iva.dIncludedExactTaxValue}
                                                            ,{iva.dTotalSale}
@@ -427,8 +438,8 @@ namespace FatturazioneAPI.Services
                                                        ({receiptNameSplit[0]}
                                                        ,{receiptNameSplit[2]}
                                                        ,{receiptNameSplit[1]}
-                                                       ,'{DateTime.Now.ToString("yyyyMMdd")}'
-                                                       ,'{DateTime.Now.ToString("hhmmss")}'
+                                                       ,'{receiptNameSplit[3].Substring(0, 8)}'
+                                                       ,'{receiptNameSplit[3].Substring(8, 6)}'
                                                        ,{invoiceYear}
                                                        ,'{receiptNumber}'
                                                        ,'IT_INVOICE'
@@ -564,6 +575,146 @@ namespace FatturazioneAPI.Services
 
 
         }
+
+        public List<RicevutaStoricoModel> RicercaRicevutaStorico(RicercaRicevutaStoricoRequest request)
+        {
+
+
+            List<RicevutaStoricoModel> result = new List<RicevutaStoricoModel>();
+
+            string query = $@"SELECT [szInvoiceNmbr] receipt_number
+                                      ,[lInvoiceYear] receipt_year
+                                      ,[lRetailStoreID] store_id
+                                      ,[szDate] date
+                                      ,[lInvoiceType] receipt_type
+                                  FROM [TPCentralDB_TP4].[dbo].[ITInvoiceFooter] 
+                                WHERE  (szInvoiceNmbr = {GetStringOrNull(request.receipt_number)} OR ISNULL({GetStringOrNull(request.receipt_number)},'') = '')
+	                                AND (szDate BETWEEN isnull({GetStringOrNull(request.date_start)} ,getdate())
+                                        AND isnull({GetStringOrNull(request.date_end)} ,getdate())
+                                    OR (ISNULL({GetStringOrNull(request.date_start)},'')='') and ISNULL({GetStringOrNull(request.date_end)},'')='')";
+            using (SqlCommand cmd = new SqlCommand(query, con))
+            {
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (!reader.HasRows)
+                    {
+                        return result;
+                    }
+
+                    while (reader.Read())
+                    {
+                        string dataStr = reader["date"].ToString()!;
+                        result.Add(new RicevutaStoricoModel(reader["receipt_number"].ToString()!,
+                            reader["receipt_year"].ToString()!,
+                            reader["store_id"].ToString()!,
+                            new DateTime(int.Parse(dataStr.Substring(0, 4)), int.Parse(dataStr.Substring(4, 2)), int.Parse(dataStr.Substring(6, 2))),
+                            reader["receipt_type"].ToString()!
+                            ));
+
+                    }
+                }
+            }
+            return result;
+        }
+
+        public GetInfoTransazioneResponse GetInfoTransazione(GetInfoTransazioneRequest request)
+        {
+            GetInfoTransazioneResponse result;
+
+            string query = $@"SELECT it.lRetailStoreID store_id,it.lTxWorkstationNmbr workstation_id,it.lTxTaNmbr ta,it.szTxDate date,ici.client_id
+                                FROM ITInvoiceTransaction it 
+								JOIN ITInvoiceCustomer ic 
+									ON it.lRetailStoreID = ic.lRetailStoreID 
+									AND it.lInvoiceYear = ic.lInvoiceYear 
+									AND it.szInvoiceNmbr = ic.szInvoiceNmbr 
+									AND it.szUsageID = ic.szUsageID
+								JOIN ITInvoiceCustomerInfo ici
+									ON (ici.szTaxNmbr = ic.szTaxNmbr OR ici.szITFiscalCode = ic.szITFiscalCode OR ici.szITPassportNmbr = ic.szITPassportNmbr) 
+                                WHERE it.lRetailStoreID = '{request.store_id}'
+	                                AND it.lInvoiceYear = '{request.receipt_year}'
+	                                AND it.szInvoiceNmbr = '{request.receipt_number}' 
+                                ";
+            using (SqlCommand cmd = new SqlCommand(query, con))
+            {
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (!reader.HasRows)
+                    {
+                        throw new Exception("Ricevuta non trovata");
+                    }
+                    if (!reader.Read())
+                    {
+                        throw new Exception("Ricevuta non trovata");
+                    }
+                    string dataStr = reader["date"].ToString()!;
+                    result = new GetInfoTransazioneResponse(reader["store_id"].ToString()!,
+                            reader["workstation_id"].ToString()!,
+                            reader["ta"].ToString()!,
+                            request.date,
+                            int.Parse(reader["client_id"].ToString()!)
+                            );
+
+
+                }
+            }
+            return result;
+        }
+
+        public bool CheckInvoiceAlreadyDone(CheckInvoiceAlreadyDoneRequest request)
+        {
+
+
+            string query = $@"SELECT COUNT(1) rows
+                              FROM [TPCentralDB_TP4].[dbo].[ITInvoiceFooter] JOIN ITInvoiceTransaction it 
+                              ON ITInvoiceFooter.lRetailStoreID = it.lRetailStoreID 
+	                            AND ITInvoiceFooter.lInvoiceYear = it.lInvoiceYear 
+	                            AND ITInvoiceFooter.szInvoiceNmbr = it.szInvoiceNmbr 
+	                            AND ITInvoiceFooter.szUsageID = it.szUsageID
+                            WHERE it.lRetailStoreID = '{request.store_id}'
+	                            AND it.lTxWorkstationNmbr = '{request.workstation_id}'
+	                            AND it.lTxTaNmbr = '{request.ta}' ";
+            using (SqlCommand cmd = new SqlCommand(query, con))
+            {
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.HasRows && reader.Read())
+                    {
+                        return int.Parse(reader["rows"].ToString()!) % 2 == 1;
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
+                }
+            }
+        }
+
+        public List<RicevutaSelectModel> RemoveReceiptWithInvoice(List<RicevutaSelectModel> list)
+        {
+            string stringList = "";
+            list.ForEach(x => { stringList += @$"'{x.nomeFile.Substring(0, x.nomeFile.LastIndexOf("_")).Split("\\").Last()}',"; });
+            stringList = stringList.Substring(0, stringList.Length - 1);
+            string query = $@"SELECT DISTINCT convert(VARCHAR(10),it.lRetailStoreID )+ '_' + convert(VARCHAR(10),it.lTxWorkstationNmbr ) +'_'+convert(VARCHAR(10),it.lTxTaNmbr ) AS receipt_name
+                                FROM ITInvoiceTransaction it 
+                                WHERE convert(VARCHAR(10),it.lRetailStoreID )+ '_' + convert(VARCHAR(10),it.lTxWorkstationNmbr ) +'_'+convert(VARCHAR(10),it.lTxTaNmbr ) IN({stringList})";
+            using (SqlCommand cmd = new SqlCommand(query, con))
+            {
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            list.RemoveAll(x => x.nomeFile.Substring(0, x.nomeFile.LastIndexOf("_")).Split("\\").Last() == reader["receipt_name"]!.ToString());
+                        }
+
+                    }
+
+                }
+            }
+            return list;
+        }
+
 
         private string GetStringOrNull(string? str)
         {

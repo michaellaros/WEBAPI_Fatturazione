@@ -46,7 +46,7 @@ namespace FatturazioneAPI.Models
                     else
                     {
                         IVAModel ivaArticolo = articolo.ivaArticolo;
-                        ivaList.Add(new IVAModel(ivaArticolo.ivaGroup, ivaArticolo.ivaPercent, ivaArticolo.articlePrice, ivaArticolo.ivaPrice, ivaArticolo.groupId, ivaArticolo.szTaxAuthorityID, ivaArticolo.szTaxAuthorityName, ivaArticolo.szReceiptPrintCode, ivaArticolo.dIncludedExactTaxValue, ivaArticolo.dTotalSale, ivaArticolo.dUsedTotalSale));
+                        ivaList.Add(new IVAModel(ivaArticolo.ivaGroup, ivaArticolo.ivaPercent, ivaArticolo.articlePrice, ivaArticolo.ivaPrice, ivaArticolo.groupId, ivaArticolo.szTaxAuthorityID, ivaArticolo.szTaxAuthorityName, ivaArticolo.dIncludedExactTaxValue, ivaArticolo.dTotalSale, ivaArticolo.dUsedTotalSale));
                     }
                 }
                 return ivaList;

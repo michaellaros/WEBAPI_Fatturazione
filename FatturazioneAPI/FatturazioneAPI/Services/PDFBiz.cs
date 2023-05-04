@@ -13,6 +13,7 @@ namespace FatturazioneAPI.Services
         private readonly RicevutaBiz _ricevuta;
         private readonly DataBase _dataBase;
         private string baseFolderPDF { get { return configuration.GetSection("directories").GetValue<string>("folderPDF"); } }
+        private string templateFolderPDF { get { return configuration.GetSection("directories").GetValue<string>("templateFolder"); } }
 
         public PDFBiz(IConfiguration configuration, RicevutaBiz ricevuta, DataBase dataBase)
         {
@@ -21,7 +22,7 @@ namespace FatturazioneAPI.Services
             this._dataBase = dataBase;
         }
 
-        public string GeneraPDFFromRicevuta(SendPDFRequest request)
+        public string GeneraPDFFromRicevuta(SendPDFRequest request, GetInfoTransazioneRequest? receiptInfo = null)
         {
 
             RicevutaModel receipt = _ricevuta.GetRicevuta(request.receiptName);
@@ -40,7 +41,7 @@ namespace FatturazioneAPI.Services
 
             #region creazione documento
             // Open template
-            PdfPage template = PdfReader.Open(@"C:\Temp\template\modello-fattura.pdf", PdfDocumentOpenMode.Import).Pages[0];
+            PdfPage template = PdfReader.Open($"{templateFolderPDF}modello-{(receiptInfo != null ? "note-di-credito" : "fattura")}.pdf", PdfDocumentOpenMode.Import).Pages[0];
 
             // Create a new PDF document
             PdfDocument document = new PdfDocument();
@@ -74,7 +75,8 @@ namespace FatturazioneAPI.Services
                 {
                     XFont receiptNumberFont = new XFont("Vezus Serif Regular", 7, XFontStyle.Bold);
                     string[] ricevutaNameSplit = receipt.nome_ricevuta.Split("_");
-                    tfArticoli.DrawString($"Scontrino fiscale {ricevutaNameSplit[2]} emesso dalla cassa {ricevutaNameSplit[1]}", receiptNumberFont, XBrushes.Black, new XRect(31.5, hArticle, 500, 14));
+                    string text = receiptInfo != null ? $@"Storno Vs. Ft. n° {receiptInfo.receipt_number}_{receiptInfo.store_id}" : $"Scontrino fiscale {ricevutaNameSplit[2]} emesso dalla cassa {ricevutaNameSplit[1]}";
+                    tfArticoli.DrawString(text, receiptNumberFont, XBrushes.Black, new XRect(31.5, hArticle, 500, 14));
                     hArticle += articleDistanceY;
                 }
 
@@ -198,7 +200,7 @@ namespace FatturazioneAPI.Services
             }
             tf.DrawString(DateTime.Now.ToString("dd/MM/yyyy"), font, XBrushes.Black, new XRect(437.5, 260, 100, 20));
 
-            string receiptNumber = _dataBase.InsertFattura(receipt, client.id.Value);//_dataBase.GetReceiptNumber(shopNumber).ToString("D8");
+            string receiptNumber = _dataBase.InsertFattura(receipt, client.id.Value, receiptInfo);//_dataBase.GetReceiptNumber(shopNumber).ToString("D8");
             tf.DrawString($"{receiptNumber}/{shopNumber}", font, XBrushes.Black, new XRect(26, 260, 100, 20));
 
 
@@ -213,17 +215,23 @@ namespace FatturazioneAPI.Services
             {
                 Directory.CreateDirectory(folderPDF);
             }
-            string filename = $"{folderPDF}{receipt.nome_ricevuta}_{client.business_name}";
-            int nameUsed = 0;
-            while (File.Exists(filename + (nameUsed == 0 ? "" : $"_{nameUsed}") + ".pdf"))
-            {
-                nameUsed++;
-            }
-            document.Save(filename + (nameUsed == 0 ? "" : $"_{nameUsed}") + ".pdf");
 
-            return filename + (nameUsed == 0 ? "" : $"_{nameUsed}") + ".pdf";
+            document.Save($"{folderPDF}{receiptNumber}_{shopNumber}.pdf");
+
+            return $"{folderPDF}{receiptNumber}_{shopNumber}.pdf";
         }
 
+
+
+        public string? GetPDFnamefromTransaction(string date, string receipt_name)
+        {
+            string fileName = $@"{baseFolderPDF}{date}\{receipt_name}.pdf";
+            if (!File.Exists(fileName))
+            {
+                return null;
+            }
+            return fileName;
+        }
 
     }
 }

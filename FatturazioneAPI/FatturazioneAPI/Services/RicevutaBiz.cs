@@ -71,7 +71,7 @@ namespace FatturazioneAPI.Services
 
                                 string szTaxAuthorityID = ivaNode.SelectSingleNode("TAX/szTaxAuthorityID").InnerXml;
                                 string szTaxAuthorityName = ivaNode.SelectSingleNode("TAX/szTaxAuthorityName").InnerXml;
-                                string szReceiptPrintCode = ivaNode.SelectSingleNode("TAX/szReceiptPrintCode").InnerXml;
+                                //string szReceiptPrintCode = ivaNode.SelectSingleNode("TAX/szReceiptPrintCode").InnerXml;
                                 decimal dIncludedExactTaxValue = ivaGroup == "Tax free" ? 0 : ivaNode.SelectSingleNode("dIncludedExactTaxValue") == null ? 0 : decimal.Parse(ivaNode.SelectSingleNode("dIncludedExactTaxValue").InnerXml);
                                 decimal dTotalSale = decimal.Parse(ivaNode.SelectSingleNode("dTotalSale").InnerXml);
                                 decimal dUsedTotalSale = decimal.Parse(ivaNode.SelectSingleNode("dUsedTotalSale").InnerXml);
@@ -79,7 +79,7 @@ namespace FatturazioneAPI.Services
 
                                 #endregion
 
-                                IVAModel iva = new IVAModel(ivaGroup, ivaPercent, prezzo + discount - ivaValue, ivaValue, ivaGroupId, szTaxAuthorityID, szTaxAuthorityName, szReceiptPrintCode, dIncludedExactTaxValue, dTotalSale, dUsedTotalSale);
+                                IVAModel iva = new IVAModel(ivaGroup, ivaPercent, prezzo + discount - ivaValue, ivaValue, ivaGroupId, szTaxAuthorityID, szTaxAuthorityName, dIncludedExactTaxValue, dTotalSale, dUsedTotalSale);
 
 
 
@@ -182,6 +182,7 @@ namespace FatturazioneAPI.Services
             return result;
         }
 
+
         public RicevutaSelectModel CheckRicevutaMatchFilter(string fileName, RicercaRicevutaRequest request)
         {
             string[] fileNameSplit = fileName.Substring(fileName.LastIndexOf(@"\") + 1).Split('_');
@@ -207,12 +208,13 @@ namespace FatturazioneAPI.Services
 
             XmlDocument xml = new XmlDocument();
             xml.Load(fileName);
-            if (xml.SelectSingleNode("TAS/NEW_TA/TA_CONTROL/szTaType").InnerXml != "SA")
+            if (xml.SelectSingleNode("TAS/NEW_TA/TA_CONTROL/szTaType").InnerXml != "SA" && xml.SelectSingleNode("TAS/NEW_TA/TA_CONTROL/szTaType").InnerXml != "FI")
             {
                 return null;
             }
-
-            decimal prezzoTotale = decimal.Parse(xml.SelectSingleNode("TAS/NEW_TA/TOTAL/dTotalSale").InnerXml);
+            XmlNode totalSaleNode = xml.SelectSingleNode("TAS/NEW_TA/TOTAL/dTotalSale");
+            if (totalSaleNode == null) { return null; }
+            decimal prezzoTotale = decimal.Parse(totalSaleNode.InnerXml);
             return new RicevutaSelectModel()
             {
                 nomeFile = fileName,
@@ -231,6 +233,8 @@ namespace FatturazioneAPI.Services
             }
             return null;
         }
+
+
 
 
 
