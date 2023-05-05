@@ -587,7 +587,7 @@ namespace FatturazioneAPI.Services
                                       ,[lRetailStoreID] store_id
                                       ,[szDate] date
                                       ,[lInvoiceType] receipt_type
-                                  FROM [TPCentralDB_TP4].[dbo].[ITInvoiceFooter] 
+                                  FROM [dbo].[ITInvoiceFooter] 
                                 WHERE  (szInvoiceNmbr = {GetStringOrNull(request.receipt_number)} OR ISNULL({GetStringOrNull(request.receipt_number)},'') = '')
 	                                AND (szDate BETWEEN isnull({GetStringOrNull(request.date_start)} ,getdate())
                                         AND isnull({GetStringOrNull(request.date_end)} ,getdate())
@@ -665,7 +665,7 @@ namespace FatturazioneAPI.Services
 
 
             string query = $@"SELECT COUNT(1) rows
-                              FROM [TPCentralDB_TP4].[dbo].[ITInvoiceFooter] JOIN ITInvoiceTransaction it 
+                              FROM [dbo].[ITInvoiceFooter] JOIN ITInvoiceTransaction it 
                               ON ITInvoiceFooter.lRetailStoreID = it.lRetailStoreID 
 	                            AND ITInvoiceFooter.lInvoiceYear = it.lInvoiceYear 
 	                            AND ITInvoiceFooter.szInvoiceNmbr = it.szInvoiceNmbr 
