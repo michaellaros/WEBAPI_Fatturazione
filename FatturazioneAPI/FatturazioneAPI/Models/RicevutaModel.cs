@@ -12,6 +12,8 @@ namespace FatturazioneAPI.Models
         public string szWorkstationID { get; set; }
         [JsonIgnore]
         public int lOperatorID { get; set; }
+        [JsonIgnore]
+        public int lFPtrReceiptNmbr { get; set; }
         public decimal prezzo_totale
         {
             get
@@ -49,7 +51,7 @@ namespace FatturazioneAPI.Models
                         ivaList.Add(new IVAModel(ivaArticolo.ivaGroup, ivaArticolo.ivaPercent, ivaArticolo.articlePrice, ivaArticolo.ivaPrice, ivaArticolo.groupId, ivaArticolo.szTaxAuthorityID, ivaArticolo.szTaxAuthorityName, ivaArticolo.dIncludedExactTaxValue, ivaArticolo.dTotalSale, ivaArticolo.dUsedTotalSale));
                     }
                 }
-                return ivaList;
+                return ivaList.OrderBy((x) => x.ivaGroup).ToList();
 
             }
         }

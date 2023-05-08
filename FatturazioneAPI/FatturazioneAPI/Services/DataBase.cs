@@ -2,7 +2,6 @@
 using FatturazioneAPI.Models;
 using Microsoft.Data.SqlClient;
 using FatturazioneAPI.Models.Responses;
-
 namespace FatturazioneAPI.Services
 {
     public class DataBase
@@ -146,28 +145,6 @@ namespace FatturazioneAPI.Services
             return null;
         }
 
-        public int GetReceiptNumber(string shopNumber)
-        {
-            string query = $@"select NEXT VALUE FOR dbo.GelMarket_Receipt_S{shopNumber} as receiptNumber";
-            using (SqlCommand cmd = new SqlCommand(query, con))
-            {
-                using (SqlDataReader reader = cmd.ExecuteReader())
-                {
-                    if (!reader.HasRows)
-                    {
-                        return -1;
-                    }
-
-                    while (reader.Read())
-                    {
-                        return int.Parse(reader["receiptNumber"].ToString()!);
-
-                    }
-                }
-            }
-            return -1;
-        }
-
         public string InsertFattura(RicevutaModel receipt, int client_id, GetInfoTransazioneRequest? receiptInfo = null)
 
         {
@@ -226,7 +203,7 @@ namespace FatturazioneAPI.Services
                                                        ,{GetStringOrNull(receipt.szWorkstationID)}
                             {(receiptInfo != null ? @$",{receiptInfo.store_id}
                                                         ,{receiptInfo.receipt_year}
-                                                        ,{receiptInfo.receipt_number}
+                                                        ,'{receiptInfo.receipt_number}'
                                                         ,'IT_INVOICE'" : "")})";
 
 
@@ -254,7 +231,7 @@ namespace FatturazioneAPI.Services
                                                        ,{receiptNameSplit[1]}
                                                        ,{receiptNameSplit[3].Substring(0, 8)}
                                                        ,{receiptNameSplit[3].Substring(8, 6)}
-                                                       ,'{receiptNumber}')"; //[lFPtrReceiptNmbr]) --todo_ora_szInvoiceNmbr 
+                                                       ,'{receipt.lFPtrReceiptNmbr}')";
 
                     cmd.CommandText = insertITInvoiceTransaction;
                     int resultITInvoiceTransaction = cmd.ExecuteNonQuery();
@@ -422,9 +399,9 @@ namespace FatturazioneAPI.Services
                     int resultITInvoiceTax = cmd.ExecuteNonQuery();
                     if (resultITInvoiceTax <= 0) { throw new Exception("Query didn't succeed"); }
 
-
-
-                    string insertITInvoiceTxJournal = $@"INSERT INTO [dbo].[ITInvoiceTxJournal]
+                    if (receiptInfo == null)
+                    {
+                        string insertITInvoiceTxJournal = $@"INSERT INTO [dbo].[ITInvoiceTxJournal]
                                                        ([lRetailStoreID]
                                                        ,[lTaNmbr]
                                                        ,[lWorkstationNmbr]
@@ -444,9 +421,12 @@ namespace FatturazioneAPI.Services
                                                        ,'{receiptNumber}'
                                                        ,'IT_INVOICE'
                                                        ,{DateTime.Now.ToString("yyyyMMddhhmmss")})";
-                    cmd.CommandText = insertITInvoiceTxJournal;
-                    int resultITInvoiceTxJournal = cmd.ExecuteNonQuery();
-                    if (resultITInvoiceTxJournal <= 0) { throw new Exception("Query didn't succeed"); }
+                        cmd.CommandText = insertITInvoiceTxJournal;
+                        int resultITInvoiceTxJournal = cmd.ExecuteNonQuery();
+                        if (resultITInvoiceTxJournal <= 0) { throw new Exception("Query didn't succeed"); }
+                    }
+
+
 
                     sqlTransaction.Commit();
                     return receiptNumber;
@@ -582,16 +562,23 @@ namespace FatturazioneAPI.Services
 
             List<RicevutaStoricoModel> result = new List<RicevutaStoricoModel>();
 
-            string query = $@"SELECT [szInvoiceNmbr] receipt_number
-                                      ,[lInvoiceYear] receipt_year
-                                      ,[lRetailStoreID] store_id
-                                      ,[szDate] date
-                                      ,[lInvoiceType] receipt_type
-                                  FROM [dbo].[ITInvoiceFooter] 
-                                WHERE  (szInvoiceNmbr = {GetStringOrNull(request.receipt_number)} OR ISNULL({GetStringOrNull(request.receipt_number)},'') = '')
-	                                AND (szDate BETWEEN isnull({GetStringOrNull(request.date_start)} ,getdate())
+            string query = $@"SELECT f.[szInvoiceNmbr] receipt_number
+									  ,[if].szInvoiceNmbr storno_number
+                                      ,f.[lInvoiceYear] receipt_year
+                                      ,f.[lRetailStoreID] store_id
+                                      ,f.[szDate] date
+                                      ,f.[lInvoiceType] receipt_type
+                                  FROM [dbo].[ITInvoiceFooter] f
+								  LEFT JOIN ITInvoiceFooter [if] 
+									ON f.lRetailStoreID = [if].lRetailStoreID
+									AND f.lInvoiceYear = [if].lInvoiceYear
+									AND f.szInvoiceNmbr = [IF].szParentInvoiceNmbr
+									AND f.szUsageID = [if].szUsageID
+                                WHERE  (f.szInvoiceNmbr = {GetStringOrNull(request.receipt_number)} OR ISNULL({GetStringOrNull(request.receipt_number)},'') = '')
+	                                AND (f.szDate BETWEEN isnull({GetStringOrNull(request.date_start)} ,getdate())
                                         AND isnull({GetStringOrNull(request.date_end)} ,getdate())
-                                    OR (ISNULL({GetStringOrNull(request.date_start)},'')='') and ISNULL({GetStringOrNull(request.date_end)},'')='')";
+                                    OR (ISNULL({GetStringOrNull(request.date_start)},'')='') and ISNULL({GetStringOrNull(request.date_end)},'')='') 
+                                       {(request.store_id.HasValue ? @$"and (f.lRetailStoreID = {request.store_id.ToString()} )" : "")} ";
             using (SqlCommand cmd = new SqlCommand(query, con))
             {
                 using (SqlDataReader reader = cmd.ExecuteReader())
@@ -605,6 +592,7 @@ namespace FatturazioneAPI.Services
                     {
                         string dataStr = reader["date"].ToString()!;
                         result.Add(new RicevutaStoricoModel(reader["receipt_number"].ToString()!,
+                            reader["storno_number"].ToString(),
                             reader["receipt_year"].ToString()!,
                             reader["store_id"].ToString()!,
                             new DateTime(int.Parse(dataStr.Substring(0, 4)), int.Parse(dataStr.Substring(4, 2)), int.Parse(dataStr.Substring(6, 2))),

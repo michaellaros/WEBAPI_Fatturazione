@@ -38,9 +38,10 @@ namespace FatturazioneAPI.Controllers
                 {
                     return Conflict("Fattura già esistente!");
                 }
-                string fileName = _PDF.GeneraPDFFromRicevuta(request);
-                var stream = new FileStream(fileName, FileMode.Open);
-                return File(stream, "application/pdf");
+                GetInfoTransazioneRequest receipt_number = _PDF.GeneraPDFFromRicevuta(request);
+                //string fileName = _PDF.GeneraPDFFromRicevuta(request);
+                //var stream = new FileStream(fileName, FileMode.Open);
+                return Ok(receipt_number);
             }
             catch (Exception ex)
             {
@@ -86,9 +87,13 @@ namespace FatturazioneAPI.Controllers
                 {
                     return Conflict("Fattura non esistente o già stornata!");
                 }
-                string fileName = _PDF.GeneraPDFFromRicevuta(requestPDF, request);//$@"{request.receipt_number}_{response.store_id}");
-                var stream = new FileStream(fileName, FileMode.Open);
-                return File(stream, "application/pdf");
+
+
+
+                GetInfoTransazioneRequest receipt_number = _PDF.GeneraPDFFromRicevuta(requestPDF, request);
+                //string fileName = _PDF.GeneraPDFFromRicevuta(request);
+                //var stream = new FileStream(fileName, FileMode.Open);
+                return Ok(receipt_number);
 
             }
             catch (Exception ex)

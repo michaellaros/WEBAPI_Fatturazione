@@ -32,8 +32,9 @@ namespace FatturazioneAPI.Services
                     xml.Load(fileName);
 
                     ricevuta.szType = xml.SelectSingleNode("TAS/NEW_TA/TA_CONTROL/szTaType").InnerXml;
-                    ricevuta.szWorkstationID = xml.SelectSingleNode("TAS/NEW_TA/HEADER/szWorkstationID").InnerXml;
-                    ricevuta.lOperatorID = int.Parse(xml.SelectSingleNode("TAS/NEW_TA/HEADER/lOperatorID").InnerXml);
+                    ricevuta.szWorkstationID = xml.SelectSingleNode("TAS/NEW_TA/HEADER/szWorkstationID")!.InnerXml;
+                    ricevuta.lOperatorID = int.Parse(xml.SelectSingleNode("TAS/NEW_TA/HEADER/lOperatorID")!.InnerXml);
+                    ricevuta.lFPtrReceiptNmbr = int.Parse(xml.SelectSingleNode("TAS/NEW_TA/FOOTER/lFPtrReceiptNmbr")!.InnerXml);
                     //verifico che sia di tipo sale
                     if (ricevuta.szType == "SA" || ricevuta.szType == "FI")
                     {
@@ -75,6 +76,7 @@ namespace FatturazioneAPI.Services
                                 decimal dIncludedExactTaxValue = ivaGroup == "Tax free" ? 0 : ivaNode.SelectSingleNode("dIncludedExactTaxValue") == null ? 0 : decimal.Parse(ivaNode.SelectSingleNode("dIncludedExactTaxValue").InnerXml);
                                 decimal dTotalSale = decimal.Parse(ivaNode.SelectSingleNode("dTotalSale").InnerXml);
                                 decimal dUsedTotalSale = decimal.Parse(ivaNode.SelectSingleNode("dUsedTotalSale").InnerXml);
+
 
 
                                 #endregion

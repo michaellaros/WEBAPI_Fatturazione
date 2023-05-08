@@ -14,10 +14,10 @@ namespace FatturazioneAPI.Controllers
         private readonly PDFBiz _PDF;
         private readonly DataBase _dataBase;
 
-        public RicevutaController(IConfiguration configuration, PDFBiz pdf, DataBase dataBase)
+        public RicevutaController(IConfiguration configuration, PDFBiz pdf, RicevutaBiz ricevuta, DataBase dataBase)
         {
             _dataBase = dataBase; //possibile miglioria? interfaccia?
-            _ricevuta = new RicevutaBiz(configuration);
+            _ricevuta = ricevuta;
             _PDF = pdf;
 
         }

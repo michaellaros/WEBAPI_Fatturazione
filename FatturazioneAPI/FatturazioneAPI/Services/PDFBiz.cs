@@ -1,6 +1,7 @@
 ﻿using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using FatturazioneAPI.Models.Requests;
+
 using PdfSharp.Drawing.Layout;
 using FatturazioneAPI.Models;
 using PdfSharp.Pdf.IO;
@@ -22,7 +23,7 @@ namespace FatturazioneAPI.Services
             this._dataBase = dataBase;
         }
 
-        public string GeneraPDFFromRicevuta(SendPDFRequest request, GetInfoTransazioneRequest? receiptInfo = null)
+        public GetInfoTransazioneRequest GeneraPDFFromRicevuta(SendPDFRequest request, GetInfoTransazioneRequest? receiptInfo = null)
         {
 
             RicevutaModel receipt = _ricevuta.GetRicevuta(request.receiptName);
@@ -34,7 +35,7 @@ namespace FatturazioneAPI.Services
             //abilito lettura caratteri speciali
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             // Create a font
-            XFont font = new XFont("Vezus Serif Regular", 7, XFontStyle.Regular);
+            XFont font = new XFont("Times New Roman (serif)", 7, XFontStyle.Regular);
             int nArticoliPagina = 25;
 
             #endregion
@@ -73,9 +74,9 @@ namespace FatturazioneAPI.Services
                 tfArticoli.DrawString((i + 1).ToString(), font, XBrushes.Black, new XRect(526, 260, 100, 20)); //page number
                 if (i == 0) //print receipt number on first page
                 {
-                    XFont receiptNumberFont = new XFont("Vezus Serif Regular", 7, XFontStyle.Bold);
+                    XFont receiptNumberFont = new XFont("Times New Roman (serif)", 7, XFontStyle.Bold);
                     string[] ricevutaNameSplit = receipt.nome_ricevuta.Split("_");
-                    string text = receiptInfo != null ? $@"Storno Vs. Ft. n° {receiptInfo.receipt_number}_{receiptInfo.store_id}" : $"Scontrino fiscale {ricevutaNameSplit[2]} emesso dalla cassa {ricevutaNameSplit[1]}";
+                    string text = receiptInfo != null ? $@"Storno Vs. Ft. n° {receiptInfo.receipt_number}_{receiptInfo.store_id}" : $"Scontrino fiscale {receipt.lFPtrReceiptNmbr.ToString()} emesso dalla cassa {ricevutaNameSplit[1]}";
                     tfArticoli.DrawString(text, receiptNumberFont, XBrushes.Black, new XRect(31.5, hArticle, 500, 14));
                     hArticle += articleDistanceY;
                 }
@@ -156,7 +157,7 @@ namespace FatturazioneAPI.Services
                 group.Offset(vettIva);
             }
 
-            XFont fontTotal = new XFont("Vezus Serif Regular", 10, XFontStyle.Regular);
+            XFont fontTotal = new XFont("Times New Roman (serif)", 10, XFontStyle.Regular);
 
             decimal articleTotal = 0, ivaTotal = 0;
             receipt.riepilogoIva.ForEach(iva => { articleTotal += iva.articlePrice; ivaTotal += iva.ivaPrice; });
@@ -218,7 +219,14 @@ namespace FatturazioneAPI.Services
 
             document.Save($"{folderPDF}{receiptNumber}_{shopNumber}.pdf");
 
-            return $"{folderPDF}{receiptNumber}_{shopNumber}.pdf";
+            return new GetInfoTransazioneRequest
+            {
+                store_id = receipt.nome_ricevuta.Split("_")[0],
+                receipt_year = DateTime.Now.Year.ToString(),
+                receipt_number = receiptNumber,
+                date = DateTime.Now.ToString("yyyyMMdd"),
+
+            };
         }
 
 
