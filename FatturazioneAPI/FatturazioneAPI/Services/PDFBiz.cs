@@ -201,32 +201,36 @@ namespace FatturazioneAPI.Services
             }
             tf.DrawString(DateTime.Now.ToString("dd/MM/yyyy"), font, XBrushes.Black, new XRect(437.5, 260, 100, 20));
 
-            string receiptNumber = _dataBase.InsertFattura(receipt, client.id.Value, receiptInfo);//_dataBase.GetReceiptNumber(shopNumber).ToString("D8");
-            tf.DrawString($"{receiptNumber}/{shopNumber}", font, XBrushes.Black, new XRect(26, 260, 100, 20));
-
-
-
-            gfx.Dispose();
-            #endregion
-
-
-            // Save the document...
-            string folderPDF = baseFolderPDF + DateTime.Now.ToString("yyyyMMdd") + @"\";
-            if (!Directory.Exists(folderPDF))
+            if ((!_dataBase.CheckInvoiceAlreadyDone(new CheckInvoiceAlreadyDoneRequest(receipt.nome_ricevuta)) && receiptInfo == null) || (_dataBase.CheckInvoiceAlreadyDone(new CheckInvoiceAlreadyDoneRequest(receipt.nome_ricevuta)) && receiptInfo != null))
             {
-                Directory.CreateDirectory(folderPDF);
+                string receiptNumber = _dataBase.InsertFattura(receipt, client.id.Value, receiptInfo);//_dataBase.GetReceiptNumber(shopNumber).ToString("D8");
+                tf.DrawString($"{receiptNumber}/{shopNumber}", font, XBrushes.Black, new XRect(26, 260, 100, 20));
+                gfx.Dispose();
+                string folderPDF = baseFolderPDF + DateTime.Now.ToString("yyyyMMdd") + @"\";
+
+                // Save the document...
+
+                if (!Directory.Exists(folderPDF))
+                {
+                    Directory.CreateDirectory(folderPDF);
+                }
+
+                document.Save($"{folderPDF}{receiptNumber}_{shopNumber}.pdf");
+
+                return new GetInfoTransazioneRequest
+                {
+                    store_id = receipt.nome_ricevuta.Split("_")[0],
+                    receipt_year = DateTime.Now.Year.ToString(),
+                    receipt_number = receiptNumber,
+                    date = DateTime.Now.ToString("yyyyMMdd"),
+
+                };
             }
-
-            document.Save($"{folderPDF}{receiptNumber}_{shopNumber}.pdf");
-
-            return new GetInfoTransazioneRequest
+            else
             {
-                store_id = receipt.nome_ricevuta.Split("_")[0],
-                receipt_year = DateTime.Now.Year.ToString(),
-                receipt_number = receiptNumber,
-                date = DateTime.Now.ToString("yyyyMMdd"),
-
-            };
+                throw new Exception(receiptInfo == null ? "Fattura già generata!" : "Nota di credito già generata!");
+            }
+            #endregion
         }
 
 

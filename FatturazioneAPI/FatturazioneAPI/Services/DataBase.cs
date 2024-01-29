@@ -2,6 +2,7 @@
 using FatturazioneAPI.Models;
 using Microsoft.Data.SqlClient;
 using FatturazioneAPI.Models.Responses;
+
 namespace FatturazioneAPI.Services
 {
     public class DataBase
@@ -59,25 +60,26 @@ namespace FatturazioneAPI.Services
 
                     while (reader.Read())
                     {
-                        result.Add(new ClientiModel(int.Parse(reader["client_id"].ToString()!),
-                            reader["business_name"].ToString()!,
-                            reader["cf"].ToString()!,
-                            reader["piva"].ToString()!,
-                            reader["passport_number"].ToString()!,
-                            reader["surname"].ToString()!,
-                            reader["name"].ToString()!,
-                            reader["client_id"].ToString()!,
-                            reader["email"].ToString()!,
-                            reader["tel_number"].ToString()!,
-                            reader["cel_number"].ToString()!,
-                            reader["address"].ToString()!,
-                            reader["city"].ToString()!,
-                            reader["zipcode"].ToString()!,
-                            reader["district_code"].ToString()!,
-                            reader["country_code"].ToString()!,
-                            reader["cod_destionazione"].ToString()!,
-                            reader["note"].ToString()!
-                            ));
+                        result.Add(new ClientiModel(
+                int.TryParse(reader["client_id"].ToString(), out int clientId) ? clientId : 0,
+                (reader["business_name"].ToString() == "NULL") ? null : reader["business_name"].ToString(),
+                (reader["cf"].ToString() == "NULL") ? null : reader["cf"].ToString(),
+                (reader["piva"].ToString() == "NULL") ? null : reader["piva"].ToString(),
+                (reader["passport_number"].ToString() == "NULL") ? null : reader["passport_number"].ToString(),
+                (reader["surname"].ToString() == "NULL") ? null : reader["surname"].ToString(),
+                (reader["name"].ToString() == "NULL") ? null : reader["name"].ToString(),
+                (reader["client_id"].ToString() == "NULL") ? null : reader["client_id"].ToString(),
+                (reader["email"].ToString() == "NULL") ? null : reader["email"].ToString(),
+                (reader["tel_number"].ToString() == "NULL") ? null : reader["tel_number"].ToString(),
+                (reader["cel_number"].ToString() == "NULL") ? null : reader["cel_number"].ToString(),
+                (reader["address"].ToString() == "NULL") ? null : reader["address"].ToString(),
+                (reader["city"].ToString() == "NULL") ? null : reader["city"].ToString(),
+                (reader["zipcode"].ToString() == "NULL") ? null : reader["zipcode"].ToString(),
+                (reader["district_code"].ToString() == "NULL") ? null : reader["district_code"].ToString(),
+                (reader["country_code"].ToString() == "NULL") ? null : reader["country_code"].ToString(),
+                (reader["cod_destionazione"].ToString() == "NULL") ? null : reader["cod_destionazione"].ToString(),
+                (reader["note"].ToString() == "NULL") ? null : reader["note"].ToString()
+            ));
 
                     }
                 }
@@ -512,6 +514,8 @@ namespace FatturazioneAPI.Services
 
         }
 
+
+
         public void UpdateClient(ClientiModel client)
         {
             string queryUpdate = $@"UPDATE [dbo].[ITInvoiceCustomerInfo]
@@ -701,6 +705,70 @@ namespace FatturazioneAPI.Services
                 }
             }
             return list;
+        }
+
+        public bool CheckValidProvince(string codice, string citta, string cod_paese, string provincia)
+        {
+            string query = $@"select 1
+                            from ITInvoiceProvince 
+                            where  codice = @codice
+							and Citta = @citta
+							and Cod_paese = @cod_paese
+							and Provincia= @provincia";
+            bool result = false;
+            using (SqlCommand cmd = new SqlCommand(query, con))
+            {
+                cmd.Parameters.AddWithValue("@codice", codice);
+                cmd.Parameters.AddWithValue("@citta", citta);
+                cmd.Parameters.AddWithValue("@cod_paese", cod_paese);
+                cmd.Parameters.AddWithValue("@provincia", provincia);
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    result = reader.HasRows;
+
+
+                }
+            }
+            con.Close();
+            return result;
+
+        }
+
+        public List<ProvinciaModel> GetProvince(string filter)
+        {
+            string query = $@"select top(50) Codice, Citta, Cod_paese,Provincia 
+                            from ITInvoiceProvince 
+                            where Citta_ricerca like @filter+'%'
+							and isnull(codice,'')!=''
+							and isnull(Citta,'')!=''
+							and isnull(Cod_paese,'')!=''
+							and isnull(Provincia,'')!=''";
+            List<ProvinciaModel> result = new List<ProvinciaModel>();
+            using (SqlCommand cmd = new SqlCommand(query, con))
+            {
+                cmd.Parameters.AddWithValue("@filter", filter);
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            result.Add(new ProvinciaModel()
+                            {
+                                codice = reader["Codice"].ToString()!,
+                                citta = reader["Citta"].ToString()!,
+                                cod_paese = reader["Cod_paese"].ToString()!,
+                                provincia = reader["Provincia"].ToString()!
+                            });
+                            //list.RemoveAll(x => x.nomeFile.Substring(0, x.nomeFile.LastIndexOf("_")).Split("\\").Last() == reader["receipt_name"]!.ToString());
+                        }
+
+                    }
+
+                }
+            }
+            con.Close();
+            return result;
         }
 
 

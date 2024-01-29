@@ -3,6 +3,7 @@ using FatturazioneAPI.Models;
 using FatturazioneAPI.Models.Requests;
 using FatturazioneAPI.Models.Responses;
 using FatturazioneAPI.Services;
+using Newtonsoft.Json;
 
 namespace FatturazioneAPI.Controllers
 {
@@ -13,12 +14,14 @@ namespace FatturazioneAPI.Controllers
         private readonly RicevutaBiz _ricevuta;
         private readonly PDFBiz _PDF;
         private readonly DataBase _dataBase;
+        private readonly ILogger<RicevutaController> _logger;
 
-        public RicevutaController(IConfiguration configuration, PDFBiz pdf, RicevutaBiz ricevuta, DataBase dataBase)
+        public RicevutaController(IConfiguration configuration, PDFBiz pdf, RicevutaBiz ricevuta, DataBase dataBase, ILogger<RicevutaController> logger)
         {
             _dataBase = dataBase; //possibile miglioria? interfaccia?
             _ricevuta = ricevuta;
             _PDF = pdf;
+            _logger = logger;
 
         }
 
@@ -39,6 +42,7 @@ namespace FatturazioneAPI.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError($"SendPDF error: {JsonConvert.SerializeObject(ex)}");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -76,6 +80,7 @@ namespace FatturazioneAPI.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError($"RicercaRicevuta error: {JsonConvert.SerializeObject(ex)}");
                 return StatusCode(500, ex.Message);
             }
 
@@ -104,6 +109,7 @@ namespace FatturazioneAPI.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError($"RicercaStoricoRicevuta error: {JsonConvert.SerializeObject(ex)}");
                 return StatusCode(500, ex.Message);
             }
 

@@ -2,6 +2,7 @@
 using FatturazioneAPI.Models.Responses;
 using FatturazioneAPI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace FatturazioneAPI.Controllers
 {
@@ -12,11 +13,13 @@ namespace FatturazioneAPI.Controllers
     {
         private readonly PDFBiz _PDF;
         private readonly DataBase _database;
+        private readonly ILogger<PDFController> _logger;
 
-        public PDFController(PDFBiz pdf, DataBase dataBase)
+        public PDFController(PDFBiz pdf, DataBase dataBase, ILogger<PDFController> logger)
         {
             _PDF = pdf;
             _database = dataBase;
+            this._logger = logger;
         }
 
         //[HttpGet]
@@ -34,6 +37,7 @@ namespace FatturazioneAPI.Controllers
         {
             try
             {
+                _logger.LogInformation($"SendPDF: {JsonConvert.SerializeObject(request)}");
                 if (_database.CheckInvoiceAlreadyDone(new CheckInvoiceAlreadyDoneRequest(request.receiptName)))
                 {
                     return Conflict("Fattura già esistente!");
@@ -41,10 +45,12 @@ namespace FatturazioneAPI.Controllers
                 GetInfoTransazioneRequest receipt_number = _PDF.GeneraPDFFromRicevuta(request);
                 //string fileName = _PDF.GeneraPDFFromRicevuta(request);
                 //var stream = new FileStream(fileName, FileMode.Open);
+                _logger.LogInformation($"SendPDF result: {JsonConvert.SerializeObject(receipt_number)}");
                 return Ok(receipt_number);
             }
             catch (Exception ex)
             {
+                _logger.LogError($"SendPDF error: {JsonConvert.SerializeObject(ex)}");
                 return StatusCode(500, ex.Message);
             }
 
@@ -56,6 +62,7 @@ namespace FatturazioneAPI.Controllers
         {
             try
             {
+                _logger.LogInformation($"GetExistingPDF: {JsonConvert.SerializeObject(request)}");
                 GetInfoTransazioneResponse response = _database.GetInfoTransazione(request);
                 string? fileName = _PDF.GetPDFnamefromTransaction(response.date, $@"{request.receipt_number}_{response.store_id}");
                 if (string.IsNullOrEmpty(fileName)) { return NotFound(); }
@@ -65,6 +72,7 @@ namespace FatturazioneAPI.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError($"GetExistingPDF error: {JsonConvert.SerializeObject(ex)}");
                 return StatusCode(500, ex.Message);
             }
 
@@ -76,7 +84,7 @@ namespace FatturazioneAPI.Controllers
         {
             try
             {
-
+                _logger.LogInformation($"GetCreditNotes: {JsonConvert.SerializeObject(request)}");
                 GetInfoTransazioneResponse response = _database.GetInfoTransazione(request);
                 SendPDFRequest requestPDF = new SendPDFRequest
                 {
@@ -93,11 +101,15 @@ namespace FatturazioneAPI.Controllers
                 GetInfoTransazioneRequest receipt_number = _PDF.GeneraPDFFromRicevuta(requestPDF, request);
                 //string fileName = _PDF.GeneraPDFFromRicevuta(request);
                 //var stream = new FileStream(fileName, FileMode.Open);
+
+                _logger.LogInformation($"GetCreditNotes result: {JsonConvert.SerializeObject(receipt_number)}");
+
                 return Ok(receipt_number);
 
             }
             catch (Exception ex)
             {
+                _logger.LogError($"GetCreditNotes error: {JsonConvert.SerializeObject(ex)}");
                 return StatusCode(500, ex.Message);
             }
 

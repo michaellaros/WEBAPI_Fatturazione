@@ -1,0 +1,54 @@
+2024-01-15 16:41:21.9585 Info Registered target NLog.Targets.FileTarget(Name=alldata)
+2024-01-15 16:41:22.0029 Info Registered target NLog.Targets.FileTarget(Name=http-requests)
+2024-01-15 16:41:22.0240 Info NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 5.2.8.2366. Product version: 5.2.8+f586f1341c46fa38aaaff4c641e7f0fa7e813943. GlobalAssemblyCache: False
+2024-01-15 16:41:22.0633 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-15 16:41:22.0824 Info Configuration initialized.
+2024-01-15 16:41:22.9892 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-24 16:09:06.8255 Info Registered target NLog.Targets.FileTarget(Name=alldata)
+2024-01-24 16:09:06.8818 Info Registered target NLog.Targets.FileTarget(Name=http-requests)
+2024-01-24 16:09:06.9075 Info NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 5.2.8.2366. Product version: 5.2.8+f586f1341c46fa38aaaff4c641e7f0fa7e813943. GlobalAssemblyCache: False
+2024-01-24 16:09:06.9519 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-24 16:09:06.9700 Info Configuration initialized.
+2024-01-24 16:09:07.7953 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-25 09:19:59.3421 Info Registered target NLog.Targets.FileTarget(Name=alldata)
+2024-01-25 09:19:59.3818 Info Registered target NLog.Targets.FileTarget(Name=http-requests)
+2024-01-25 09:19:59.4028 Info NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 5.2.8.2366. Product version: 5.2.8+f586f1341c46fa38aaaff4c641e7f0fa7e813943. GlobalAssemblyCache: False
+2024-01-25 09:19:59.4361 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-25 09:19:59.4499 Info Configuration initialized.
+2024-01-25 09:20:00.0502 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-25 09:39:59.4414 Info Registered target NLog.Targets.FileTarget(Name=alldata)
+2024-01-25 09:39:59.4589 Info Registered target NLog.Targets.FileTarget(Name=http-requests)
+2024-01-25 09:39:59.4750 Info NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 5.2.8.2366. Product version: 5.2.8+f586f1341c46fa38aaaff4c641e7f0fa7e813943. GlobalAssemblyCache: False
+2024-01-25 09:39:59.4982 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-25 09:39:59.5094 Info Configuration initialized.
+2024-01-25 09:39:59.9765 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-26 14:02:02.5331 Info Registered target NLog.Targets.FileTarget(Name=alldata)
+2024-01-26 14:02:02.5798 Info Registered target NLog.Targets.FileTarget(Name=http-requests)
+2024-01-26 14:02:02.6194 Info NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 5.2.8.2366. Product version: 5.2.8+f586f1341c46fa38aaaff4c641e7f0fa7e813943. GlobalAssemblyCache: False
+2024-01-26 14:02:02.6633 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-26 14:02:02.6846 Info Configuration initialized.
+2024-01-26 14:02:03.5407 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-26 14:04:20.0206 Info Registered target NLog.Targets.FileTarget(Name=alldata)
+2024-01-26 14:04:20.0563 Info Registered target NLog.Targets.FileTarget(Name=http-requests)
+2024-01-26 14:04:20.1052 Info NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 5.2.8.2366. Product version: 5.2.8+f586f1341c46fa38aaaff4c641e7f0fa7e813943. GlobalAssemblyCache: False
+2024-01-26 14:04:20.2579 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-26 14:04:20.2951 Info Configuration initialized.
+2024-01-26 14:04:21.2883 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-29 09:13:02.3988 Info Registered target NLog.Targets.FileTarget(Name=alldata)
+2024-01-29 09:13:02.4616 Info Registered target NLog.Targets.FileTarget(Name=http-requests)
+2024-01-29 09:13:02.4988 Info NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 5.2.8.2366. Product version: 5.2.8+f586f1341c46fa38aaaff4c641e7f0fa7e813943. GlobalAssemblyCache: False
+2024-01-29 09:13:02.5517 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-29 09:13:02.5754 Info Configuration initialized.
+2024-01-29 09:13:05.0941 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-29 12:36:03.5129 Info Registered target NLog.Targets.FileTarget(Name=alldata)
+2024-01-29 12:36:03.5677 Info Registered target NLog.Targets.FileTarget(Name=http-requests)
+2024-01-29 12:36:03.5979 Info NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 5.2.8.2366. Product version: 5.2.8+f586f1341c46fa38aaaff4c641e7f0fa7e813943. GlobalAssemblyCache: False
+2024-01-29 12:36:03.6600 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-29 12:36:03.6984 Info Configuration initialized.
+2024-01-29 12:36:04.8662 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-29 16:03:12.2185 Info Registered target NLog.Targets.FileTarget(Name=alldata)
+2024-01-29 16:03:12.2477 Info Registered target NLog.Targets.FileTarget(Name=http-requests)
+2024-01-29 16:03:12.2643 Info NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 5.2.8.2366. Product version: 5.2.8+f586f1341c46fa38aaaff4c641e7f0fa7e813943. GlobalAssemblyCache: False
+2024-01-29 16:03:12.2941 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config
+2024-01-29 16:03:12.3081 Info Configuration initialized.
+2024-01-29 16:03:12.8019 Info Validating config: TargetNames=alldata, http-requests, ConfigItems=44, FilePath=C:\Users\mdecastro\Documents\GitHub\WEBAPI_Fatturazione\FatturazioneAPI\FatturazioneAPI\bin\Debug\net7.0\nlog.config

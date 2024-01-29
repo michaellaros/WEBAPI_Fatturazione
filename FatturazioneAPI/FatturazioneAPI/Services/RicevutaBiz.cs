@@ -103,9 +103,9 @@ namespace FatturazioneAPI.Services
                 return null;
             }
 
-            catch (Exception e)
+            catch (Exception)
             {
-                throw e;
+                throw;
             }
 
 
