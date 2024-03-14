@@ -63,7 +63,7 @@ namespace FatturazioneAPI.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(client.passport_number) && !_dataBase.CheckValidProvince(client.district_code, client.city, client.country_code, client.district_code))
+                if (string.IsNullOrEmpty(client.passport_number) && !_dataBase.CheckValidProvince(client.zipcode, client.city, client.country_code, client.district_code))
                 {
                     return Conflict("Dati comune non validi!");
                 }
@@ -95,7 +95,7 @@ namespace FatturazioneAPI.Controllers
                 {
                     return BadRequest();
                 }
-                if (string.IsNullOrEmpty(client.passport_number) && !_dataBase.CheckValidProvince(client.district_code, client.city, client.country_code, client.district_code))
+                if (string.IsNullOrEmpty(client.passport_number) && !_dataBase.CheckValidProvince(client.zipcode, client.city, client.country_code, client.district_code))
                 {
                     return BadRequest("Dati città non validi!");
                 }

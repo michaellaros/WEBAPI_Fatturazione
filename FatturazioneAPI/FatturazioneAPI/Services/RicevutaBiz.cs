@@ -63,17 +63,17 @@ namespace FatturazioneAPI.Services
                                 XmlNode ivaNode = GetIvaFromArticleId(xml, node.SelectSingleNode("Hdr/lTaCreateNmbr").InnerXml);
                                 string ivaGroup = ivaNode.SelectSingleNode("TAX/szTaxGroupRuleName").InnerXml;
 
-                                decimal ivaValue = ivaGroup == "Tax free" ? 0 : ivaNode.SelectSingleNode("dIncludedTaxValue") == null ? 0 : decimal.Parse(ivaNode.SelectSingleNode("dIncludedTaxValue").InnerXml);
+                                decimal ivaValue = ivaGroup == "Tax free" || ivaGroup == "Non soggetto" ? 0 : ivaNode.SelectSingleNode("dIncludedTaxValue") == null ? 0 : decimal.Parse(ivaNode.SelectSingleNode("dIncludedTaxValue").InnerXml);
 
-                                decimal ivaPercent = ivaGroup == "Tax free" ? 0 : decimal.Parse(ivaNode.SelectSingleNode("TAX/dPercent").InnerXml);
-                                int ivaGroupId = ivaGroup == "Tax free" ? -1 : int.Parse(ivaNode.SelectSingleNode("TAX/szTaxGroupID").InnerXml);
+                                decimal ivaPercent = ivaGroup == "Tax free" || ivaGroup == "Non soggetto" ? 0 : decimal.Parse(ivaNode.SelectSingleNode("TAX/dPercent").InnerXml);
+                                int ivaGroupId = ivaGroup == "Tax free" || ivaGroup == "Non soggetto" ? -1 : int.Parse(ivaNode.SelectSingleNode("TAX/szTaxGroupID").InnerXml);
 
                                 #region For Receipt
 
                                 string szTaxAuthorityID = ivaNode.SelectSingleNode("TAX/szTaxAuthorityID").InnerXml;
                                 string szTaxAuthorityName = ivaNode.SelectSingleNode("TAX/szTaxAuthorityName").InnerXml;
                                 //string szReceiptPrintCode = ivaNode.SelectSingleNode("TAX/szReceiptPrintCode").InnerXml;
-                                decimal dIncludedExactTaxValue = ivaGroup == "Tax free" ? 0 : ivaNode.SelectSingleNode("dIncludedExactTaxValue") == null ? 0 : decimal.Parse(ivaNode.SelectSingleNode("dIncludedExactTaxValue").InnerXml);
+                                decimal dIncludedExactTaxValue = ivaGroup == "Tax free" || ivaGroup == "Non soggetto" ? 0 : ivaNode.SelectSingleNode("dIncludedExactTaxValue") == null ? 0 : decimal.Parse(ivaNode.SelectSingleNode("dIncludedExactTaxValue").InnerXml);
                                 decimal dTotalSale = decimal.Parse(ivaNode.SelectSingleNode("dTotalSale").InnerXml);
                                 decimal dUsedTotalSale = decimal.Parse(ivaNode.SelectSingleNode("dUsedTotalSale").InnerXml);
 
